@@ -30,8 +30,8 @@ class ChatRoom {
   }
 
   startListening({
- onChange = null, onNew = null, onRemove = null, onModify = null
- }) {
+    onChange = null, onNew = null, onRemove = null, onModify = null,
+  }) {
     if (this.listening) return;
     this.listening = true;
     this.onChangeCallback = onChange;
@@ -84,7 +84,11 @@ class ChatRoom {
           this.messages.splice(change.newIndex, 0, change.doc.data());
         }
         if (this.onModifyCallback) {
-          this.onModifyCallback({ oldIndex: change.oldIndex, newIndex: change.newIndex, messages: this.messages });
+          this.onModifyCallback({
+            oldIndex: change.oldIndex,
+            newIndex: change.newIndex,
+            messages: this.messages,
+          });
         }
       }
       if (change.type === 'removed') {
