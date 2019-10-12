@@ -8,7 +8,7 @@ import db from './db';
  *
  * const netflix = new ChatRoom('www.netflix.com');
  * netflix.startListening({
- *   onChange: (messages) => console.log(messages),
+ *   onChange: ({messages}) => console.log(messages),
  *   onNew: ({index, messages}) => console.log('Added message at ', index),
  *   onModify: ({oldIndex, newIndex, messages}) => console.log('Modified message moved from ', oldIndex, ' to ', newIndex),
  *   onRemove: ({index, messages}) => console.log('Removed message at ', index)
@@ -56,7 +56,9 @@ class ChatRoom {
     }
 
     stopListening() {
-        this.unsubscribe();
+        if (this.unsubscribe) {
+            this.unsubscribe();
+        }
         this.listening = false;
     }
 
