@@ -1,20 +1,54 @@
 import React from 'react';
 import { Card, CardBody } from 'shards-react';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'shards-ui/dist/css/shards.min.css';
-
+import ChatRoom from '../../api/ChatRoom';
+import TextBar from './TextBar';
+import Messages from './Messages';
 
 export default class ChatContainer extends React.Component {
-    render() {
-        return (
-          <div className="ChatContainer">
-            <Card>
-              <CardBody>
-                Nunc quis nisl ac justo elementum sagittis in quis justo.
-              </CardBody>
-            </Card>
-          </div>
-        );
-    }
+  constructor() {
+    super();
+    this.chatroom = new ChatRoom('www.netflix.com');
+    this.state = {
+      message: '',
+      chatroom: 'www.netflix.com',
+      messages: []
+    };
+  }
+
+  componentDidMount() {
+    this.setChatRoom('www.netflix.com');
+  }
+
+  setChatRoom(chatroom) {
+    this.chatroom.stopListening();
+    this.chatroom = new ChatRoom(chatroom);
+    this.setState({ messages: [] });
+    this.chatroom.startListening({
+      onChange: ({ messages }) => {
+        this.setState({ messages });
+      }
+    });
+  }
+
+  render() {
+    const { chatroom, message, messages } = this.state;
+
+    return (
+      <div className="ChatContainer">
+        <Card>
+          <CardBody>
+            Now Chatting on&nbsp;
+            {chatroom}
+          </CardBody>
+        </Card>
+        <Messages messages={messages} />
+        <TextBar
+          handleChange={e => this.setState({ message: e.target.value })}
+          handleSubmit={() => this.chatroom.send({ message, userId: 'aboberg' })}
+          value={message}
+        />
+      </div>
+    );
+  }
 }
