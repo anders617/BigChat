@@ -70,14 +70,14 @@ class ChatRoom {
 
     onChange = (change) => {
       if (change.type === 'added') {
-        console.log('New Message: ', change.doc.data().message, ' At Index: ', change.newIndex);
-        this.messages.splice(change.newIndex, 0, change.doc.data());
+        const message = change.doc.data();
+        message.id = change.doc.id;
+        this.messages.splice(change.newIndex, 0, message);
         if (this.onNewCallback) {
           this.onNewCallback({ index: change.newIndex, messages: this.messages });
         }
       }
       if (change.type === 'modified') {
-        console.log('Modified Message: ', change.doc.data().message, ' At Index: ', change.newIndex);
         this.messages[change.oldIndex] = change.doc.data();
         if (change.oldIndex !== change.newIndex) {
           this.messages.splice(change.oldIndex, 1);
@@ -92,7 +92,6 @@ class ChatRoom {
         }
       }
       if (change.type === 'removed') {
-        console.log('Removed Message: ', change.doc.data().message, ' At Index: ', change.oldIndex);
         this.messages.splice(change.oldIndex, 1);
         if (this.onRemoveCallback) {
           this.onRemoveCallback({ index: change.oldIndex, messages: this.messages });
@@ -101,7 +100,6 @@ class ChatRoom {
       if (this.onChangeCallback) {
         this.onChangeCallback({ messages: this.messages });
       }
-      console.log('Log: ', this.messages);
     }
 }
 

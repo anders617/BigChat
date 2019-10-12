@@ -31,7 +31,10 @@ class DirectMessages {
   }
 
   getDocId() {
-    return `${auth.currentUser.email}-${this.email}`;
+    if (auth.currentUser.email < this.email) {
+      return `${auth.currentUser.email}-${this.email}`;
+    }
+    return `${this.email}-${auth.currentUser.email}`; 
   }
 
   startListening({
@@ -75,7 +78,9 @@ class DirectMessages {
 
     onChange = (change) => {
       if (change.type === 'added') {
-        this.messages.splice(change.newIndex, 0, change.doc.data());
+        const message = change.doc.data()
+        message.id = change.doc.id;
+        this.messages.splice(change.newIndex, 0, message);
         if (this.onNewCallback) {
           this.onNewCallback({ index: change.newIndex, messages: this.messages });
         }
