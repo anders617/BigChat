@@ -1,17 +1,13 @@
 {
-    "name": "Big Chat",
-    "version": "1.0",
-    "description": "Chat it up my man!",
-		"permissions": ["storage", "declarativeContent", "activeTab"],
-    "manifest_version": 2,
-		"background": {
-    		"scripts": ["background.js"],
-      	"persistent": false
-    },
-		"browser_action": {
-    		"default_icon": {
-						"32": "icon.png"
-				},
-				"default_popup": "popup.html"
-    }
+  "name": "Big Chat",
+	"version": "1.0",
+	"manifest_version": 2,
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["src/index.js"],
+			"run_at": "document_idle"
+		}
+	],
+	"permissions": ["activeTab"]
 }
