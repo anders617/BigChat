@@ -1,5 +1,6 @@
 import React from 'react';
 import ChatRoom from './api/ChatRoom';
+import ChatContainer from './components/chat/ChatContainer';
 
 export default class App extends React.Component {
   constructor() {
@@ -28,6 +29,7 @@ export default class App extends React.Component {
 
     return (
       <div className="App">
+        <ChatContainer />
         <div>Hello World</div>
         <div>
           <div>Chatroom:</div>
