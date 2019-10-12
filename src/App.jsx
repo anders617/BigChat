@@ -1,6 +1,5 @@
 import React from 'react';
 
-import SignInScreen from './components/authentication/AuthenticationContainer';
 import ChatRoom from './api/ChatRoom';
 import ChatContainer from './components/chat/ChatContainer';
 
@@ -28,8 +27,6 @@ export default class App extends React.Component {
 
   render() {
     const { chatroom, message, messages } = this.state;
-
-    return (<SignInScreen />);
 
     return (
       <div className="App">
