@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardBody } from 'shards-react';
 
 import auth from '../../api/auth';
-import ChatRoom from '../../api/ChatRoom';
+import { ChatRoom, PUBLIC_CHAT } from '../../api/ChatRoom';
 import TextBar from './TextBar';
 import Messages from './Messages';
 
@@ -10,7 +10,7 @@ import Messages from './Messages';
 export default class ChatContainer extends React.Component {
   constructor() {
     super();
-    this.chatroom = new ChatRoom('www.netflix.com');
+    this.chatroom = new ChatRoom({chatId: 'www.netflix.com', type: PUBLIC_CHAT});
     this.state = {
       message: '',
       chatroom: 'www.netflix.com',
@@ -24,7 +24,7 @@ export default class ChatContainer extends React.Component {
 
   setChatRoom(chatroom) {
     this.chatroom.stopListening();
-    this.chatroom = new ChatRoom(chatroom);
+    this.chatroom = new ChatRoom({chatId: chatroom, type: PUBLIC_CHAT});
     this.setState({ messages: [] });
     this.chatroom.startListening({
       onChange: ({ messages }) => {
@@ -44,7 +44,7 @@ export default class ChatContainer extends React.Component {
             {chatroom}
           </CardBody>
         </Card>
-        <Messages messages={messages} currentUser={auth.currentUser.email} />
+        <Messages messages={messages.slice().reverse()} currentUser={auth.currentUser.email} />
         <TextBar
           handleChange={e => this.setState({ message: e.target.value })}
           handleSubmit={() =>

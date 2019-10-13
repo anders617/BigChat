@@ -5,7 +5,7 @@ module.exports = {
     host: 'localhost',
     port: 3000,
   },
-  entry: './src/index.jsx',
+  entry: ['babel-polyfill', './src/index.jsx'],
   module: {
     rules: [
       {
