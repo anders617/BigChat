@@ -51,20 +51,25 @@ export default class ChatContainer extends React.Component {
     const { chatroom, message, messages } = this.state;
 
     return (
-      <div className="ChatContainer">
+      <div className="ChatContainer" style={{ height: '100vh' }}>
         <Card>
           <CardBody>
             Now Chatting on&nbsp;
             {chatroom}
           </CardBody>
         </Card>
-        <Messages messages={messages.slice().reverse()} currentUser={auth.currentUser.email} />
-        <TextBar
-          handleChange={e => this.setState({ message: e.target.value })}
-          handleSubmit={this.handleSubmit}
-          handleKeyPress={this.handleKeyPress}
-          value={message}
+        <Messages
+          messages={messages.slice().reverse()}
+          currentUser={auth.currentUser.email}
         />
+        <Card style={{ position: 'sticky', margin: 'auto', bottom: '0px' }}>
+          <TextBar
+            handleChange={e => this.setState({ message: e.target.value })}
+            handleSubmit={this.handleSubmit}
+            handleKeyPress={this.handleKeyPress}
+            value={message}
+          />
+        </Card>
       </div>
     );
   }
