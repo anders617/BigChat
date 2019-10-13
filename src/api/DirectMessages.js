@@ -3,6 +3,7 @@ import 'firebase/firestore';
 
 import db from './db';
 import auth from './auth';
+import { sendDirectMessage, lookupUser } from './functions';
 
 /**
  *
@@ -31,10 +32,14 @@ class DirectMessages {
   }
 
   getDocId() {
-    if (auth.currentUser.email < this.email) {
-      return `${auth.currentUser.email}-${this.email}`;
-    }
-    return `${this.email}-${auth.currentUser.email}`; 
+    return lookupUser({email: this.email})
+      .then(({data}) => {
+        const otherId = data.uid;
+        if (otherId < auth.currentUser.uid) {
+          return `${otherId}-${auth.currentUser.uid}`;
+        }
+        return `${auth.currentUser.uid}-${otherId}`;
+      });
   }
 
   startListening({
@@ -46,14 +51,22 @@ class DirectMessages {
     this.onNewCallback = onNew;
     this.onRemoveCallback = onRemove;
     this.onModifyCallback = onModify;
-    this.unsubscribe = db.collection('directmessages')
-      .doc(this.getDocId())
-      .collection('messages')
-      .orderBy('timestamp')
-      .onSnapshot(this.onSnapshot);
+    this.getDocId()
+      .then(docId => {
+        this.unsubscribe = db.collection('directmessages')
+          .doc(docId)
+          .collection('messages')
+          .orderBy('timestamp')
+          .onSnapshot(this.onSnapshot);
+      })
   }
 
-  send({ message, userId, timestamp = null }) {
+  send({ message }) {
+    sendDirectMessage({
+      message: message,
+      otherEmail: this.email,
+    });
+    return;
     const payload = {
       message,
       timestamp: timestamp || firebase.firestore.Timestamp.now(),
