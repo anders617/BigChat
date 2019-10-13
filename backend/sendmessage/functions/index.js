@@ -60,18 +60,7 @@ exports.sendDirectMessage = functions.https.onCall((data, context) => {
       } else {
         chatKey = user.uid + '-' + chatKey;
       }
-      return app.firestore().collection('directmessages')
-        .doc(chatKey)
-        .collection('messages')
-        .add({
-          message: message,
-          userId: email,
-          timestamp: admin.firestore.Timestamp.now(),
-        }).then(_ => {
-          return { success: true };
-        }).catch(err => {
-          throw new functions.https.HttpsError('unknown', err.message);
-        });
+      return addMessage({message, context, collectionId: 'directmessages', docId: chatKey});
     }).catch(err => {
       throw new functions.https.HttpsError('unknown', err.message)
     });
@@ -95,20 +84,25 @@ exports.sendMessage = functions.https.onCall((data, context) => {
     // Throwing an HttpsError so that the client gets the error details.
     throw new functions.https.HttpsError('invalid-argument', 'Invalid parameters.');
   }
-  return app.firestore()
-    .collection('chatrooms')
-    .doc(chatroom)
-    .collection('messages')
-    .add({
-      message: message,
-      userId: email,
-      timestamp: admin.firestore.Timestamp.now(),
-    }).then(newdoc => {
-      console.log('Success ', newdoc);
-      return { success: true };
-    })
-    .catch(err => {
-      console.log('Error', err);
-      throw new functions.https.HttpsError('unknown', 'Server error', err.message);
-    });
+  return addMessage({message, context, collectionId: 'chatrooms', docId: chatroom});
 });
+
+const addMessage = ({message, context, collectionId, docId}) => {
+  return app.firestore()
+  .collection(collectionId)
+  .doc(docId)
+  .collection('messages')
+  .add({
+    message: message,
+    userId: context.auth.token.email,
+    timestamp: admin.firestore.Timestamp.now(),
+    photoUrl: context.auth.token.picture,
+  }).then(newdoc => {
+    console.log('Success ', newdoc);
+    return { success: true };
+  })
+  .catch(err => {
+    console.log('Error', err);
+    throw new functions.https.HttpsError('unknown', 'Server error', err.message);
+  });
+}

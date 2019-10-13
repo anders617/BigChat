@@ -24,12 +24,13 @@ const PUBLIC_CHAT = 'PUBLIC_CHAT';
  */
 class ChatRoom {
 
-  constructor({ chatId, type = PUBLIC_CHAT }) {
+  constructor({ chatId, type = PUBLIC_CHAT, messageLimit = 20 }) {
     this.messages = [];
     this.listening = false;
     this.unsubscribe = null;
     this.chatId = chatId;
     this.type = type;
+    this.messageLimit = messageLimit;
 
     this.onChangeCallback = null;
     this.onNewCallback = null;
@@ -58,7 +59,7 @@ class ChatRoom {
       .doc(docId)
       .collection('messages')
       .orderBy('timestamp', 'desc')
-      .limit(50)
+      .limit(this.messageLimit)
       .onSnapshot(this.onSnapshot);
   }
 
