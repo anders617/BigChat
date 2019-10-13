@@ -1,9 +1,11 @@
 import React from 'react';
 import { Card, CardBody } from 'shards-react';
 
+import auth from '../../api/auth';
 import ChatRoom from '../../api/ChatRoom';
 import TextBar from './TextBar';
 import Messages from './Messages';
+
 
 export default class ChatContainer extends React.Component {
   constructor() {
@@ -42,10 +44,12 @@ export default class ChatContainer extends React.Component {
             {chatroom}
           </CardBody>
         </Card>
-        <Messages messages={messages} />
+        <Messages messages={messages} currentUser={auth.currentUser.email} />
         <TextBar
           handleChange={e => this.setState({ message: e.target.value })}
-          handleSubmit={() => this.chatroom.send({ message, userId: 'aboberg' })}
+          handleSubmit={() =>
+            this.chatroom.send({ message, userId: auth.currentUser.email })
+          }
           value={message}
         />
       </div>
