@@ -1,20 +1,27 @@
 import React from 'react';
 import {
-  Button,
   InputGroup,
+  InputGroupText,
   InputGroupAddon,
-  FormTextarea,
+  FormTextarea
 } from 'shards-react';
 
-export default function TextBar({ handleChange, handleSubmit, value }) {
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPaperPlane } from '@fortawesome/free-regular-svg-icons';
+
+export default function TextBar({ handleChange, handleKeyPress, handleSubmit, value }) {
   return (
     <div className="TextBar" style={{ display: 'flex' }}>
-      <InputGroup>
-        <FormTextarea onChange={handleChange} value={value} />
+      <InputGroup seamless>
+        <FormTextarea
+          onChange={handleChange}
+          onKeyDown={handleKeyPress}
+          value={value}
+        />
         <InputGroupAddon type="append">
-          <Button onClick={handleSubmit} type="submit" theme="primary">
-            Send
-          </Button>
+          <InputGroupText onClick={handleSubmit}>
+            <FontAwesomeIcon icon={faPaperPlane} />
+          </InputGroupText>
         </InputGroupAddon>
       </InputGroup>
     </div>

@@ -33,6 +33,20 @@ export default class ChatContainer extends React.Component {
     });
   }
 
+  handleKeyPress = (e) => {
+    if(e.keyCode === 13 && e.shiftKey === false) {
+      e.preventDefault();
+      this.handleSubmit();
+    }
+  }
+
+  handleSubmit = () => {
+    const {message} = this.state
+
+    this.chatroom.send({ message, userId: auth.currentUser.email })
+    this.setState({message:''})
+  }
+
   render() {
     const { chatroom, message, messages } = this.state;
 
@@ -47,9 +61,8 @@ export default class ChatContainer extends React.Component {
         <Messages messages={messages.slice().reverse()} currentUser={auth.currentUser.email} />
         <TextBar
           handleChange={e => this.setState({ message: e.target.value })}
-          handleSubmit={() =>
-            this.chatroom.send({ message, userId: auth.currentUser.email })
-          }
+          handleSubmit={this.handleSubmit}
+          handleKeyPress={this.handleKeyPress}
           value={message}
         />
       </div>
