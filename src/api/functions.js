@@ -10,9 +10,12 @@ const sendMessage = firebase.functions().httpsCallable('sendMessage');
 const sendDirectMessage = firebase.functions().httpsCallable('sendDirectMessage');
 // Input: {email: `string`}
 const lookupUser = firebase.functions().httpsCallable('lookupUser');
+// Input: {}
+const listDirectMessageContacts = firebase.functions().httpsCallable('listDirectMessageContacts');
 
 export {
     sendMessage,
     sendDirectMessage,
     lookupUser,
+    listDirectMessageContacts,
 };

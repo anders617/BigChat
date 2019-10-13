@@ -25,10 +25,23 @@ const checkString = ({str, msg = ''}) => {
   }
 }
 
-exports.listDirectMessageContacts = functions.https.onCall((data, context) => {
+exports.listDirectMessageContacts = functions.https.onCall(async (data, context) => {
   checkAuth({context});
-  const email = data.email;
-
+  let querySnapshot = await firebase.firestore()
+    .collection('directmessages')
+    .where('uid1', '==', context.auth.uid)
+    .get();
+  const contacts = []
+  if (querySnapshot.size() > 0) {
+    querySnapshot.forEach(doc => contacts.append(doc.get('uid2')));
+    return {contacts};
+  }
+  querySnapshot = await firebase.firestore()
+    .collection('directmessages')
+    .where('uid2', '==', context.auth.uid)
+    .get();
+  querySnapshot.forEach(doc => contacts.append(doc.get('uid1')));
+  return {contacts};
 });
 
 exports.lookupUser = functions.https.onCall((data, context) => {
@@ -61,12 +74,14 @@ exports.sendDirectMessage = functions.https.onCall((data, context) => {
   console.log(data);
   app.auth().getUserByEmail(otherEmail)
     .then((user) => {
-      let chatKey = context.auth.uid;
-      if (context.auth.uid < user.uid) {
-        chatKey += '-' + user.uid;
-      } else {
-        chatKey = user.uid + '-' + chatKey;
-      }
+      let uid1 = context.auth.uid < user.uid ? context.auth.uid : user.uid;
+      let uid2 = context.auth.uid < user.uid ? user.uid : context.auth.uid;
+      let chatKey = `${uid1}-${uid2}`;
+      // Set uid1/uid2 for the dm collection so we can lookup later.
+      app.firestore()
+        .collection('directmessages')
+        .doc(chatKey)
+        .set({uid1, uid2});
       return addMessage({message, context, collectionId: 'directmessages', docId: chatKey});
     }).catch(err => {
       throw new functions.https.HttpsError('unknown', err.message)
@@ -95,6 +110,7 @@ const expandMessage = ({original, context}) => {
     'run': 'ᕕ( ᐛ )ᕗ',
     'ayyy': '(☞ﾟヮﾟ)☞',
     'ryantj': '(◕‿◕✿)',
+    'anders': 'A̹̙̯̣̹̹n͔̕d̹̲̯̖͍̭̼e̛͉̠̳̺̘ͅr̬̺͔̙͉̮̹s̪͈̲̖̼̜͡ ͖i̼̯̤͎͇̥s̪̦͈͉̹̙ ̤̹̻̙ͅl͓̻̞̞͍̩i̤̞̼̪ͅt͔̹̕t̷y̪̗̭̞̹',
     'me': context.auth.token.name,
   };
   replacements['help'] = 'Try the following / commands: ' + Object.keys(replacements)
