@@ -1,4 +1,5 @@
 const HtmlWebPackPlugin = require('html-webpack-plugin');
+const EncodingPlugin = require('webpack-encoding-plugin');
 
 module.exports = {
   devServer: {
@@ -6,6 +7,10 @@ module.exports = {
     port: 3000,
   },
   entry: './src/index.jsx',
+	output: {
+		path: __dirname + '/dist',
+		filename: 'main.js',
+	},
   module: {
     rules: [
       {
@@ -37,5 +42,8 @@ module.exports = {
       template: './src/index.html',
       filename: './index.html',
     }),
+		new EncodingPlugin({
+			encoding: 'ascii',
+		}),
   ],
 };

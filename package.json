@@ -36,8 +36,9 @@
     "popper.js": "^1.15.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "react-firebaseui": "^4.0.0",
     "shards-react": "1.0.3",
     "shards-ui": "^3.0.0",
-    "react-firebaseui": "^4.0.0"
+    "webpack-encoding-plugin": "^0.3.1"
   }
 }
