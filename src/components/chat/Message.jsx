@@ -52,14 +52,43 @@ const otherBodyStyle = {
   justifyContent: 'flex-end'
 };
 
+const avatarStyle = {
+  height: 'auto', 
+  width: 'auto', 
+  maxWidth: '50px', 
+  maxHeight: '50px',
+  borderRadius: '50%',
+  float: 'left',
+  marginRight: '5px'
+}
+
 export default function Message({ message, isOwnedByUser }) {
-    return (
-      <div className="Message">
-        <Card style={isOwnedByUser ? ownCardStyle : otherCardStyle}>
-          <CardBody style={isOwnedByUser ? ownBodyStyle : otherBodyStyle}>
+  let messageCard = (
+    <div>
+      <Card style={ownCardStyle}>
+        <CardBody style={ownBodyStyle}>
+          {message.message}
+        </CardBody>
+      </Card>
+    </div>
+  );
+
+  if (!isOwnedByUser) {
+    messageCard = (
+      <div>
+        <img src={message.photoUrl} alt="avatar" style={ avatarStyle } />
+        <Card style={otherCardStyle}>
+          <CardBody style={otherBodyStyle}>
             {message.message}
           </CardBody>
         </Card>
+      </div>
+    );
+  }
+
+    return (
+      <div className="Message">
+       {messageCard}
       </div>
     );
 }
