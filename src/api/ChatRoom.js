@@ -1,5 +1,6 @@
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
+import { sendMessage } from './functions';
 
 import db from './db';
 
@@ -45,16 +46,13 @@ class ChatRoom {
       .onSnapshot(this.onSnapshot);
   }
 
-  send({ message, userId, timestamp = null }) {
-    const payload = {
+  send({ message }) {
+    sendMessage({
       message,
-      timestamp: timestamp || firebase.firestore.Timestamp.now(),
-      userId,
-    };
-    db.collection('chatrooms')
-      .doc(this.chatroom)
-      .collection('messages')
-      .add(payload);
+      chatroom: this.chatroom,
+    }).then(res => {
+    }).catch(
+    );
   }
 
   stopListening() {
