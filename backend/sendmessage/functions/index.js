@@ -110,6 +110,7 @@ const expandMessage = ({original, context}) => {
     'run': 'ᕕ( ᐛ )ᕗ',
     'ayyy': '(☞ﾟヮﾟ)☞',
     'ryantj': '(◕‿◕✿)',
+    'uwu': ' (⁄˘⁄ ⁄ ω⁄ ⁄ ˘⁄)♡𝓤𝔀𝓤(ᵕᴗ ᵕ⁎)',
     'anders': 'A̹̙̯̣̹̹n͔̕d̹̲̯̖͍̭̼e̛͉̠̳̺̘ͅr̬̺͔̙͉̮̹s̪͈̲̖̼̜͡ ͖i̼̯̤͎͇̥s̪̦͈͉̹̙ ̤̹̻̙ͅl͓̻̞̞͍̩i̤̞̼̪ͅt͔̹̕t̷y̪̗̭̞̹',
     'me': context.auth.token.name,
   };
@@ -125,7 +126,7 @@ const expandMessage = ({original, context}) => {
             j = j + 1;
           }
           const cmd = message.substring(i + 1, j);
-          if (replacements.hasOwnProperty(cmd)) {
+          if (replacements.hasOwnProperty(cmd.toLowerCase())) {
             message = message.substring(0, i) + replacements[cmd] + message.substring(j);
             i = j + replacements[cmd].length - cmd.length - 1;
             break;
