@@ -1,13 +1,50 @@
 import React from 'react';
 
-export default function Messages({ messages }) {
-  const messagesList = messages.map((message, idx) => {
-    return <li key={message.id}>{message.message}</li>;
-  });
+import Message from './Message';
 
-  return (
-    <div className="Messages">
-      <ul>{messagesList}</ul>
-    </div>
-  );
+export default class Messages extends React.Component {
+  componentDidMount() {
+    this.scrollToBottom();
+  }
+
+  componentDidUpdate() {
+    this.scrollToBottom();
+  }
+
+  scrollToBottom() {
+    this.el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  render() {
+    const { currentUser, messages } = this.props;
+
+    const messagesList = messages.map(message => {
+      // return <li key={message.id}>{message.message}</li>;
+
+      return (
+        <div key={message.id}>
+          <Message
+            message={message}
+            isOwnedByUser={currentUser === message.userId}
+          />
+          <br />
+        </div>
+      );
+    });
+
+    return (
+      <div
+        className="Messages"
+        style={{ height: '800px', overflowY: 'scroll' }}
+      >
+        <br />
+        {messagesList}
+        <div
+          ref={el => {
+            this.el = el;
+          }}
+        />
+      </div>
+    );
+  }
 }
