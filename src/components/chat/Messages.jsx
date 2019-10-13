@@ -35,7 +35,7 @@ export default class Messages extends React.Component {
     return (
       <div
         className="Messages"
-        style={{ height: '800px', overflowY: 'scroll' }}
+        style={{  overflowY: 'scroll' }}
       >
         <br />
         {messagesList}
