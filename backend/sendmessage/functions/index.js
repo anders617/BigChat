@@ -20,7 +20,7 @@ const checkAuth = ({context}) => {
 };
 
 const checkString = ({str, msg = ''}) => {
-  if (!(typeof email === 'string') || email.length === 0) {
+  if (!(typeof str === 'string') || str.length === 0) {
     throw new functions.https.HttpsError('failed-precondition', msg);
   }
 }
@@ -81,7 +81,6 @@ exports.sendMessage = functions.https.onCall((data, context) => {
   checkAuth({context});
   const message = data.message;
   const chatroom = data.chatroom;
-  const email = context.auth.token.email;
   checkString({str: message, msg: 'Message must be non empty string.'});
   checkString({str: chatroom, msg: 'Chatroom must be non empty string.'});
   return addMessage({message, context, collectionId: 'chatrooms', docId: chatroom});
