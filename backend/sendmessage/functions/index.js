@@ -27,16 +27,16 @@ const checkString = ({str, msg = ''}) => {
 
 exports.listDirectMessageContacts = functions.https.onCall(async (data, context) => {
   checkAuth({context});
-  let querySnapshot = await firebase.firestore()
+  let querySnapshot = await app.firestore()
     .collection('directmessages')
     .where('uid1', '==', context.auth.uid)
     .get();
   const contacts = []
-  if (querySnapshot.size() > 0) {
+  if (querySnapshot.size > 0) {
     querySnapshot.forEach(doc => contacts.append(doc.get('uid2')));
     return {contacts};
   }
-  querySnapshot = await firebase.firestore()
+  querySnapshot = await app.firestore()
     .collection('directmessages')
     .where('uid2', '==', context.auth.uid)
     .get();
