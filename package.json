@@ -31,14 +31,17 @@
   },
   "dependencies": {
     "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-regular-svg-icons": "^5.11.2",
+    "@fortawesome/react-fontawesome": "^0.1.6",
     "bootstrap": "^4.3.1",
     "firebase ": " ^7.2.0",
     "jquery": "^3.4.1",
     "popper.js": "^1.15.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
+    "react-firebaseui": "^4.0.0",
     "shards-react": "1.0.3",
-    "shards-ui": "^3.0.0",
-    "react-firebaseui": "^4.0.0"
+    "shards-ui": "^3.0.0"
   }
 }
