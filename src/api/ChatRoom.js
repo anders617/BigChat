@@ -64,7 +64,7 @@ class ChatRoom {
   }
 
   async getDirectMessageId() {
-    const { data } = await lookupUser({ email: this.email });
+    const { data } = await lookupUser({ email: this.chatId });
     const otherId = data.uid;
     if (otherId < auth.currentUser.uid) {
       return `${otherId}-${auth.currentUser.uid}`;
