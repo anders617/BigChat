@@ -6,7 +6,7 @@ const ownCardStyle = {
   minHeight: '3em',
   borderRadius: '30px',
   backgroundColor: '#0067f4',
-  width: '300px',
+  width: '80%',
   marginRight: '5px',
   marginLeft: 'auto',
   display: 'flex',
@@ -31,7 +31,7 @@ const otherCardStyle = {
   minHeight: '3em',
   borderRadius: '30px',
   backgroundColor: '#333',
-  width: '300px',
+  width: '80%',
   marginRight: 'auto',
   marginLeft: '5px',
   display: 'flex',
@@ -55,8 +55,8 @@ const otherBodyStyle = {
 const avatarStyle = {
   height: 'auto', 
   width: 'auto', 
-  maxWidth: '50px', 
-  maxHeight: '50px',
+  maxWidth: '40px', 
+  maxHeight: '40px',
   borderRadius: '50%',
   float: 'left',
   marginRight: '5px'
