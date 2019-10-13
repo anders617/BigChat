@@ -1,7 +1,13 @@
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
 
+import { sendMessage, lookupUser, sendDirectMessage } from './functions';
+import auth from './auth';
 import db from './db';
+
+const DIRECT_MESSAGE = 'DIRECT_MESSAGE';
+
+const PUBLIC_CHAT = 'PUBLIC_CHAT';
 
 /**
  *
@@ -17,11 +23,14 @@ import db from './db';
  *
  */
 class ChatRoom {
-  constructor(chatroom) {
+
+  constructor({ chatId, type = PUBLIC_CHAT, messageLimit = 20 }) {
     this.messages = [];
     this.listening = false;
     this.unsubscribe = null;
-    this.chatroom = chatroom;
+    this.chatId = chatId;
+    this.type = type;
+    this.messageLimit = messageLimit;
 
     this.onChangeCallback = null;
     this.onNewCallback = null;
@@ -29,7 +38,11 @@ class ChatRoom {
     this.onModifyCallback = null;
   }
 
-  startListening({
+  getCollectionId() {
+    return this.type === DIRECT_MESSAGE ? 'directmessages' : 'chatrooms';
+  }
+
+  async startListening({
     onChange = null, onNew = null, onRemove = null, onModify = null,
   }) {
     if (this.listening) return;
@@ -38,23 +51,39 @@ class ChatRoom {
     this.onNewCallback = onNew;
     this.onRemoveCallback = onRemove;
     this.onModifyCallback = onModify;
-    this.unsubscribe = db.collection('chatrooms')
-      .doc(this.chatroom)
+    let docId = this.chatId;
+    if (this.type === DIRECT_MESSAGE) {
+      docId = await this.getDirectMessageId();
+    }
+    this.unsubscribe = db.collection(this.getCollectionId())
+      .doc(docId)
       .collection('messages')
-      .orderBy('timestamp')
+      .orderBy('timestamp', 'desc')
+      .limit(this.messageLimit)
       .onSnapshot(this.onSnapshot);
   }
 
-  send({ message, userId, timestamp = null }) {
-    const payload = {
-      message,
-      timestamp: timestamp || firebase.firestore.Timestamp.now(),
-      userId,
-    };
-    db.collection('chatrooms')
-      .doc(this.chatroom)
-      .collection('messages')
-      .add(payload);
+  async getDirectMessageId() {
+    const { data } = await lookupUser({ email: this.email });
+    const otherId = data.uid;
+    if (otherId < auth.currentUser.uid) {
+      return `${otherId}-${auth.currentUser.uid}`;
+    }
+    return `${auth.currentUser.uid}-${otherId}`;
+  }
+
+  async send({ message }) {
+    if (this.type === DIRECT_MESSAGE) {
+      await sendDirectMessage({
+        message,
+        otherEmail: this.chatId,
+      });
+    } else {
+      await sendMessage({
+        message,
+        chatroom: this.chatId,
+      });
+    }
   }
 
   stopListening() {
@@ -64,45 +93,43 @@ class ChatRoom {
     this.listening = false;
   }
 
-    onSnapshot = (snapshot) => {
-      snapshot.docChanges().forEach((change) => this.onChange(change));
-    }
+  onSnapshot = (snapshot) => {
+    snapshot.docChanges().forEach((change) => this.onChange(change));
+  }
 
-    onChange = (change) => {
-      if (change.type === 'added') {
-        console.log('New Message: ', change.doc.data().message, ' At Index: ', change.newIndex);
-        this.messages.splice(change.newIndex, 0, change.doc.data());
-        if (this.onNewCallback) {
-          this.onNewCallback({ index: change.newIndex, messages: this.messages });
-        }
+  onChange = (change) => {
+    if (change.type === 'added') {
+      const message = change.doc.data();
+      message.id = change.doc.id;
+      this.messages.splice(change.newIndex, 0, message);
+      if (this.onNewCallback) {
+        this.onNewCallback({ index: change.newIndex, messages: this.messages });
       }
-      if (change.type === 'modified') {
-        console.log('Modified Message: ', change.doc.data().message, ' At Index: ', change.newIndex);
-        this.messages[change.oldIndex] = change.doc.data();
-        if (change.oldIndex !== change.newIndex) {
-          this.messages.splice(change.oldIndex, 1);
-          this.messages.splice(change.newIndex, 0, change.doc.data());
-        }
-        if (this.onModifyCallback) {
-          this.onModifyCallback({
-            oldIndex: change.oldIndex,
-            newIndex: change.newIndex,
-            messages: this.messages,
-          });
-        }
-      }
-      if (change.type === 'removed') {
-        console.log('Removed Message: ', change.doc.data().message, ' At Index: ', change.oldIndex);
-        this.messages.splice(change.oldIndex, 1);
-        if (this.onRemoveCallback) {
-          this.onRemoveCallback({ index: change.oldIndex, messages: this.messages });
-        }
-      }
-      if (this.onChangeCallback) {
-        this.onChangeCallback({ messages: this.messages });
-      }
-      console.log('Log: ', this.messages);
     }
+    if (change.type === 'modified') {
+      this.messages[change.oldIndex] = change.doc.data();
+      if (change.oldIndex !== change.newIndex) {
+        this.messages.splice(change.oldIndex, 1);
+        this.messages.splice(change.newIndex, 0, change.doc.data());
+      }
+      if (this.onModifyCallback) {
+        this.onModifyCallback({
+          oldIndex: change.oldIndex,
+          newIndex: change.newIndex,
+          messages: this.messages,
+        });
+      }
+    }
+    if (change.type === 'removed') {
+      this.messages.splice(change.oldIndex, 1);
+      if (this.onRemoveCallback) {
+        this.onRemoveCallback({ index: change.oldIndex, messages: this.messages });
+      }
+    }
+    if (this.onChangeCallback) {
+      this.onChangeCallback({ messages: this.messages });
+    }
+  }
 }
 
-export default ChatRoom;
+export {ChatRoom, DIRECT_MESSAGE, PUBLIC_CHAT};

@@ -6,7 +6,7 @@ module.exports = {
     host: 'localhost',
     port: 3000,
   },
-  entry: './src/index.jsx',
+  entry: ['babel-polyfill', './src/index.jsx'],
 	output: {
 		path: __dirname + '/dist',
 		filename: 'main.js',

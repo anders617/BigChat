@@ -1,12 +1,16 @@
 // Import FirebaseAuth and firebase.
 import React from 'react';
-import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+import {  
+  Card,
+  CardTitle,
+  CardBody,
+} from 'shards-react';
 import * as firebase from 'firebase';
 import { FirebaseAuth } from 'react-firebaseui';
 
 import auth from '../../api/auth';
 
-class SignInScreen extends React.Component {
+class AuthenticationContainer extends React.Component {
   // Configure FirebaseUI.
   uiConfig = {
     // Popup signin flow rather than redirect flow.
@@ -14,8 +18,16 @@ class SignInScreen extends React.Component {
     // We will display Google and Facebook as auth providers.
     signInOptions: [
       firebase.auth.EmailAuthProvider.PROVIDER_ID,
-      firebase.auth.FacebookAuthProvider.PROVIDER_ID,
       firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+      firebase.auth.FacebookAuthProvider.PROVIDER_ID,
+      firebase.auth.GithubAuthProvider.PROVIDER_ID,
+      {
+        provider: 'yahoo.com',
+        providerName: 'Yahoo!',
+        buttonColor: '#720e9e',
+        iconUrl: 'http://www.iconarchive.com/download/i75943/martz90/circle/yahoo.ico',
+        loginHintKey: 'login_hint',
+      },
     ],
     callbacks: {
       // Avoid redirects after sign-in.
@@ -45,25 +57,20 @@ class SignInScreen extends React.Component {
 
   render() {
     const { isSignedIn } = this.state;
+    const { children } = this.props;
     if (!isSignedIn) {
       return (
-        <div>
-          <h1>My App</h1>
-          <p>Please sign-in:</p>
-          <FirebaseAuth uiConfig={this.uiConfig} firebaseAuth={auth} />
-        </div>
+        <Card>
+          <CardBody>
+            <CardTitle style={{ textAlign: 'center', fontSize: '32pt', marginBottom: '20px' }}>BigChat</CardTitle>
+            <p style={{ textAlign: 'center' }}>Please Sign In</p>
+            <FirebaseAuth uiConfig={this.uiConfig} firebaseAuth={auth} />
+          </CardBody>
+        </Card>
       );
     }
-    return (
-      <div>
-        <h1>My App</h1>
-        <p>
-          {auth.currentUser.displayName}
-        </p>
-        <button onClick={() => auth.signOut()}>Sign-out</button>
-      </div>
-    );
+    return children;
   }
 }
 
-export default SignInScreen;
+export default AuthenticationContainer;
