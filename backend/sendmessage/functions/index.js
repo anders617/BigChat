@@ -11,16 +11,30 @@ const app = admin.initializeApp({
   databaseURL: "https://bigchat-88c14.firebaseio.com",
 });
 
-exports.lookupUser = functions.https.onCall((data, context) => {
+const checkAuth = ({context}) => {
   if (!context.auth) {
     // Throwing an HttpsError so that the client gets the error details.
     throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
         'while authenticated.');
   }
-  const email = data.email;
+};
+
+const checkString = ({str, msg = ''}) => {
   if (!(typeof email === 'string') || email.length === 0) {
-    throw new functions.https.HttpsError('failed-precondition', 'Invalid email');
+    throw new functions.https.HttpsError('failed-precondition', msg);
   }
+}
+
+exports.listDirectMessageContacts = functions.https.onCall((data, context) => {
+  checkAuth({context});
+  const email = data.email;
+
+});
+
+exports.lookupUser = functions.https.onCall((data, context) => {
+  checkAuth({context});
+  const email = data.email;
+  checkString({str: email, msg: 'Inavlid email'});
   console.log('Request', data);
   return app.auth().getUserByEmail(email)
     .then((user) => {
@@ -38,19 +52,12 @@ exports.lookupUser = functions.https.onCall((data, context) => {
 
 exports.sendDirectMessage = functions.https.onCall((data, context) => {
   // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-        'while authenticated.');
-  }
+  checkAuth({context});
   const message = data.message;
   const otherEmail = data.otherEmail;
   const email = context.auth.token.email;
-  if (!(typeof message === 'string') || message.length === 0 ||
-      !(typeof otherEmail === 'string') || otherEmail.length === 0) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('invalid-argument', 'Invalid parameters.');
-  }
+  checkString({str: message, msg: 'Message must be non empty string.'});
+  checkString({str: otherEmail, msg: 'Email must be non empty string'});
   console.log(data);
   app.auth().getUserByEmail(otherEmail)
     .then((user) => {
@@ -71,26 +78,14 @@ exports.sendDirectMessage = functions.https.onCall((data, context) => {
 //
 exports.sendMessage = functions.https.onCall((data, context) => {
   // Checking that the user is authenticated.
-  if (!context.auth) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-        'while authenticated.');
-  }
+  checkAuth({context});
   const message = data.message;
   const chatroom = data.chatroom;
   const email = context.auth.token.email;
-  if (!(typeof message === 'string') || message.length === 0 ||
-      !(typeof chatroom === 'string') || chatroom.length === 0) {
-    // Throwing an HttpsError so that the client gets the error details.
-    throw new functions.https.HttpsError('invalid-argument', 'Invalid parameters.');
-  }
+  checkString({str: message, msg: 'Message must be non empty string.'});
+  checkString({str: chatroom, msg: 'Chatroom must be non empty string.'});
   return addMessage({message, context, collectionId: 'chatrooms', docId: chatroom});
 });
-
-const replacing = ({original, start, end, replacement}) => {
-  result = original.substring(0, start) + replacement + original.substring(end);
-  return {result, newEndIdx: j + replacement.length - cmd.length - 1};
-}
 
 const expandMessage = ({original, context}) => {
   const replacements = {
@@ -110,7 +105,6 @@ const expandMessage = ({original, context}) => {
   for (let i = 0;i < message.length;i++) {
     if (message[i] === '/') {
       for (let j = i;j < message.length;j++) {
-        console.log(i, j, message.length - 1);
         if (message[j] === ' ' || j === message.length - 1) {
           if (j === message.length - 1) {
             j = j + 1;
