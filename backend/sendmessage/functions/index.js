@@ -87,13 +87,54 @@ exports.sendMessage = functions.https.onCall((data, context) => {
   return addMessage({message, context, collectionId: 'chatrooms', docId: chatroom});
 });
 
+const replacing = ({original, start, end, replacement}) => {
+  result = original.substring(0, start) + replacement + original.substring(end);
+  return {result, newEndIdx: j + replacement.length - cmd.length - 1};
+}
+
+const expandMessage = ({original, context}) => {
+  const replacements = {
+    'shrug': '¯\\_(ツ)_/¯',
+    'table': '(╯°□°）╯︵ ┻━┻',
+    'angry': 'ಠ_ಠ',
+    'energy': '༼ つ ◕_◕ ༽つ',
+    'run': 'ᕕ( ᐛ )ᕗ',
+    'ayyy': '(☞ﾟヮﾟ)☞',
+    'ryantj': '(◕‿◕✿)',
+    'me': context.auth.token.name,
+  };
+  replacements['help'] = 'Try the following / commands: ' + Object.keys(replacements)
+      .filter((key) => replacements.hasOwnProperty(key))
+      .join('\n');
+  let message = original;
+  for (let i = 0;i < message.length;i++) {
+    if (message[i] === '/') {
+      for (let j = i;j < message.length;j++) {
+        console.log(i, j, message.length - 1);
+        if (message[j] === ' ' || j === message.length - 1) {
+          if (j === message.length - 1) {
+            j = j + 1;
+          }
+          const cmd = message.substring(i + 1, j);
+          if (replacements.hasOwnProperty(cmd)) {
+            message = message.substring(0, i) + replacements[cmd] + message.substring(j);
+            i = j + replacements[cmd].length - cmd.length - 1;
+            break;
+          }
+        }
+      }
+    }
+  }
+  return message;
+}
+
 const addMessage = ({message, context, collectionId, docId}) => {
   return app.firestore()
   .collection(collectionId)
   .doc(docId)
   .collection('messages')
   .add({
-    message: message,
+    message: expandMessage({original: message, context}),
     userId: context.auth.token.email,
     timestamp: admin.firestore.Timestamp.now(),
     photoUrl: context.auth.token.picture,
