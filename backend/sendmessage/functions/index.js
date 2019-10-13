@@ -146,7 +146,7 @@ const addMessage = ({message, context, collectionId, docId}) => {
     message: expandMessage({original: message, context}),
     userId: context.auth.token.email,
     timestamp: admin.firestore.Timestamp.now(),
-    photoUrl: context.auth.token.picture,
+    photoUrl: context.auth.token.picture ? context.auth.token.picture : '',
   }).then(newdoc => {
     console.log('Success ', newdoc);
     return { success: true };
