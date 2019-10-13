@@ -1,5 +1,6 @@
 const HtmlWebPackPlugin = require('html-webpack-plugin');
 const EncodingPlugin = require('webpack-encoding-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   devServer: {
@@ -45,5 +46,8 @@ module.exports = {
 		new EncodingPlugin({
 			encoding: 'ascii',
 		}),
+		new CopyPlugin([
+			{from: './src/contentscript.js', to: 'contentscript.js'},
+		]),
   ],
 };
