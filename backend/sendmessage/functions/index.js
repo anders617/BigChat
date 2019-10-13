@@ -11,6 +11,72 @@ const app = admin.initializeApp({
   databaseURL: "https://bigchat-88c14.firebaseio.com",
 });
 
+exports.lookupUser = functions.https.onCall((data, context) => {
+  if (!context.auth) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
+        'while authenticated.');
+  }
+  const email = data.email;
+  if (!(typeof email === 'string') || email.length === 0) {
+    throw new functions.https.HttpsError('failed-precondition', 'Invalid email');
+  }
+  console.log('Request', data);
+  return app.auth().getUserByEmail(email)
+    .then((user) => {
+      const res = {
+        uid: user.uid,
+        photoUrl: user.photoURL,
+        displayName: user.displayName,
+      };
+      console.log('Response', res);
+      return res;
+    }).catch(err => {
+      throw new functions.https.HttpsError('unknown', err.message);
+    })
+});
+
+exports.sendDirectMessage = functions.https.onCall((data, context) => {
+  // Checking that the user is authenticated.
+  if (!context.auth) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
+        'while authenticated.');
+  }
+  const message = data.message;
+  const otherEmail = data.otherEmail;
+  const email = context.auth.token.email;
+  if (!(typeof message === 'string') || message.length === 0 ||
+      !(typeof otherEmail === 'string') || otherEmail.length === 0) {
+    // Throwing an HttpsError so that the client gets the error details.
+    throw new functions.https.HttpsError('invalid-argument', 'Invalid parameters.');
+  }
+  console.log(data);
+  app.auth().getUserByEmail(otherEmail)
+    .then((user) => {
+      let chatKey = context.auth.uid;
+      if (context.auth.uid < user.uid) {
+        chatKey += '-' + user.uid;
+      } else {
+        chatKey = user.uid + '-' + chatKey;
+      }
+      return app.firestore().collection('directmessages')
+        .doc(chatKey)
+        .collection('messages')
+        .add({
+          message: message,
+          userId: email,
+          timestamp: admin.firestore.Timestamp.now(),
+        }).then(_ => {
+          return { success: true };
+        }).catch(err => {
+          throw new functions.https.HttpsError('unknown', err.message);
+        });
+    }).catch(err => {
+      throw new functions.https.HttpsError('unknown', err.message)
+    });
+})
+
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
 //
