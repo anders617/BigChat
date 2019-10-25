@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@master
-      - name: Install ESLint
-        run: npm install eslint
+      - name: Install Dependencies
+        run: npm install --prefix=./backend/sendmessage/functions
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
