@@ -15,9 +15,9 @@ jobs:
         run: npm install --prefix=./backend/sendmessage/functions
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
-        working-directory: ./backend/sendmessage
         with:
           args: deploy --only functions
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+          PROJECT_PATH: ./backend/sendmessage
           PROJECT_ID: bigchat-88c14
