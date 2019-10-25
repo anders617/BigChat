@@ -4,12 +4,7 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Cloud Firestore.
 const admin = require('firebase-admin');
 
-const serviceAccount = require("./serviceAccountKey.json");
-
-const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://bigchat-88c14.firebaseio.com",
-});
+const app = admin.initializeApp();
 
 const checkAuth = ({context}) => {
   if (!context.auth) {
