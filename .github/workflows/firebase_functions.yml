@@ -13,9 +13,6 @@ jobs:
         uses: actions/checkout@master
       - name: Install Dependencies
         run: npm install --prefix=./backend/sendmessage/functions
-      - name: ESLint
-        working-directory: ./backend/sendmessage
-        run: npm run lint
       - name: Deploy to Firebase
         uses: w9jds/firebase-action@master
         with:
