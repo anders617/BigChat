@@ -4,6 +4,8 @@ import 'firebase/firestore';
 import { sendMessage, lookupUser, sendDirectMessage } from './functions';
 import auth from './auth';
 import db from './db';
+import analytics from './analytics';
+import { SEND_MESSAGE, CHAT_LISTEN } from './analyticsevents';
 
 const DIRECT_MESSAGE = 'DIRECT_MESSAGE';
 
@@ -61,6 +63,10 @@ class ChatRoom {
       .orderBy('timestamp', 'desc')
       .limit(this.messageLimit)
       .onSnapshot(this.onSnapshot);
+    analytics.logEvent(CHAT_LISTEN, {
+      type: this.type,
+      chat: this.chatId,
+    });
   }
 
   async getDirectMessageId() {
@@ -73,6 +79,10 @@ class ChatRoom {
   }
 
   async send({ message }) {
+    analytics.logEvent(SEND_MESSAGE, {
+      type: this.type,
+      chat: this.chatId,
+    });
     if (this.type === DIRECT_MESSAGE) {
       await sendDirectMessage({
         message,

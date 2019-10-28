@@ -9,6 +9,8 @@ import * as firebase from 'firebase';
 import { FirebaseAuth } from 'react-firebaseui';
 
 import auth from '../../api/auth';
+import analytics from '../../api/analytics';
+import { LOGIN } from '../../api/analyticsevents';
 
 class AuthenticationContainer extends React.Component {
   // Configure FirebaseUI.
@@ -31,7 +33,8 @@ class AuthenticationContainer extends React.Component {
     ],
     callbacks: {
       // Avoid redirects after sign-in.
-      signInSuccessWithAuthResult: () => false,
+      signInSuccessWithAuthResult: () => {
+      },
     },
   };
 
@@ -46,7 +49,12 @@ class AuthenticationContainer extends React.Component {
   // Listen to the Firebase Auth state and set the local state.
   componentDidMount() {
     this.unregisterAuthObserver = auth.onAuthStateChanged(
-      (user) => this.setState({ isSignedIn: !!user }),
+      (user) => {
+        this.setState({ isSignedIn: !!user });
+        if (user) {
+          analytics.logEvent(LOGIN, {});
+        }
+      },
     );
   }
 
