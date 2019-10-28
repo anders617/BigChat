@@ -27,12 +27,12 @@ exports.listDirectMessageContacts = functions.https.onCall(async (data, context)
     .where('uid1', '==', context.auth.uid)
     .get();
   const userIds = []
-  querySnapshot.forEach(doc => userIds.append(doc.get('uid2')));
+  querySnapshot.forEach(doc => userIds.push(doc.get('uid2')));
   querySnapshot = await app.firestore()
     .collection('directmessages')
     .where('uid2', '==', context.auth.uid)
     .get();
-  querySnapshot.forEach(doc => userIds.append(doc.get('uid1')));
+  querySnapshot.forEach(doc => userIds.push(doc.get('uid1')));
   const contacts = userIds.map(async (uid) => {
     const user = await app.auth().getUser(uid);
     return {
