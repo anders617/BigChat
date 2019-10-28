@@ -35,12 +35,14 @@ exports.listDirectMessageContacts = functions.https.onCall(async (data, context)
   querySnapshot.forEach(doc => userIds.push(doc.get('uid1')));
   const contacts = userIds.map(async (uid) => {
     const user = await app.auth().getUser(uid);
-    return {
+    const res = {
       uid: user.uid,
       photoUrl: user.photoURL,
       displayName: user.displayName,
       email: user.email,
     };
+    console.log("Response:", res);
+    return res;
   });
   return {contacts};
 });
