@@ -26,16 +26,22 @@ exports.listDirectMessageContacts = functions.https.onCall(async (data, context)
     .collection('directmessages')
     .where('uid1', '==', context.auth.uid)
     .get();
-  const contacts = []
-  if (querySnapshot.size > 0) {
-    querySnapshot.forEach(doc => contacts.append(doc.get('uid2')));
-    return {contacts};
-  }
+  const userIds = []
+  querySnapshot.forEach(doc => userIds.append(doc.get('uid2')));
   querySnapshot = await app.firestore()
     .collection('directmessages')
     .where('uid2', '==', context.auth.uid)
     .get();
-  querySnapshot.forEach(doc => contacts.append(doc.get('uid1')));
+  querySnapshot.forEach(doc => userIds.append(doc.get('uid1')));
+  const contacts = userIds.map(async (uid) => {
+    const user = await app.auth().getUser(uid);
+    return {
+      uid: user.uid,
+      photoUrl: user.photoURL,
+      displayName: user.displayName,
+      email: user.email,
+    };
+  });
   return {contacts};
 });
 
@@ -50,6 +56,7 @@ exports.lookupUser = functions.https.onCall((data, context) => {
         uid: user.uid,
         photoUrl: user.photoURL,
         displayName: user.displayName,
+        email: user.email,
       };
       console.log('Response', res);
       return res;
