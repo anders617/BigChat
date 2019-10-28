@@ -34,7 +34,7 @@ exports.listDirectMessageContacts = functions.https.onCall(async (data, context)
     .get();
   querySnapshot.forEach(doc => userIds.push(doc.get('uid1')));
   const usersReqs = []
-  for (let i = 0;i < contacts.length;i++) {
+  for (let i = 0;i < userIds.length;i++) {
     usersReqs.push(app.auth().getUser(userIds[i]));
     contacts.push({
       uid: user.uid,
