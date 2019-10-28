@@ -36,7 +36,7 @@ exports.listDirectMessageContacts = functions.https.onCall(async (data, context)
   const usersReqs = []
   for (let i = 0;i < userIds.length;i++) {
     usersReqs.push(app.auth().getUser(userIds[i]));
-    contacts.push({
+    usersReqs.push({
       uid: user.uid,
       photoUrl: user.photoURL,
       displayName: user.displayName,
