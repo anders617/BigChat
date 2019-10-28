@@ -14,7 +14,7 @@
 	"browser_action": {
 		"default_popup": "dist/index.html"
 	},
-	"content_security_policy": "script-src 'self' https://apis.google.com https://www.googleapis.com https://github.com; object-src 'self'; frame-ancestors 'self' https://github.com chrome-extension://gmohllaklcohbekoncgdnapbgmmcioen https://*",
+	"content_security_policy": "script-src 'self' https://apis.google.com https://www.googleapis.com https://github.com https://www.google-analytics.com https://www.googletagmanager.com; object-src 'self'; frame-ancestors 'self' https://github.com chrome-extension://gmohllaklcohbekoncgdnapbgmmcioen https://*",
 	"web_accessible_resources": [
         "dist/index.html"
   ]
