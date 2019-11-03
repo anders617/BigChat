@@ -1,22 +1,20 @@
 {
-  "name": "Big Chat",
+	"name": "Big Chat",
 	"version": "1.0",
 	"manifest_version": 2,
-	"content_scripts": [
-		{
-			"matches": ["<all_urls>"],
-			"js": ["contentscript.js", "background.js"],
-			"run_at": "document_idle",
-			"all_frames": false
-		}
-	],
+	"content_scripts": [{
+		"matches": ["<all_urls>"],
+		"js": ["contentscript.js", "background.js"],
+		"run_at": "document_idle",
+		"all_frames": false
+	}],
 	"permissions": ["activeTab"],
 	"browser_action": {
 		"default_popup": "popup.html"
 	},
-	"content_security_policy": "script-src 'self' https://apis.google.com https://www.googleapis.com https://github.com; object-src 'self'; frame-ancestors 'self' https://github.com chrome-extension://lfkdhmaibbipefcenchlennlddheegbp https://*",
+	"content_security_policy": "script-src 'self' https://apis.google.com https://www.googleapis.com https://github.com https://www.google-analytics.com https://www.googletagmanager.com; object-src 'self'; frame-ancestors 'self' https://github.com chrome-extension://gmohllaklcohbekoncgdnapbgmmcioen https://*",
 	"web_accessible_resources": [
-        "popup.html"
-  ]
+		"popup.html"
+	]
 
 }

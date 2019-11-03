@@ -4,12 +4,7 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Cloud Firestore.
 const admin = require('firebase-admin');
 
-const serviceAccount = require("./serviceAccountKey.json");
-
-const app = admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://bigchat-88c14.firebaseio.com",
-});
+const app = admin.initializeApp();
 
 const checkAuth = ({
   context,
@@ -42,6 +37,8 @@ const expandMessage = ({
     'run': 'ᕕ( ᐛ )ᕗ',
     'ayyy': '(☞ﾟヮﾟ)☞',
     'ryantj': '(◕‿◕✿)',
+    'uwu': ' (⁄˘⁄ ⁄ ω⁄ ⁄ ˘⁄)♡𝓤𝔀𝓤(ᵕᴗ ᵕ⁎)',
+    'anders': 'A̹̙̯̣̹̹n͔̕d̹̲̯̖͍̭̼e̛͉̠̳̺̘ͅr̬̺͔̙͉̮̹s̪͈̲̖̼̜͡ ͖i̼̯̤͎͇̥s̪̦͈͉̹̙ ̤̹̻̙ͅl͓̻̞̞͍̩i̤̞̼̪ͅt͔̹̕t̷y̪̗̭̞̹',
     'me': context.auth.token.name,
   };
   replacements['help'] = 'Try the following / commands: ' + Object.keys(replacements)
@@ -56,7 +53,7 @@ const expandMessage = ({
             j = j + 1;
           }
           const cmd = message.substring(i + 1, j);
-          if (replacements.hasOwnProperty(cmd)) {
+          if (replacements.hasOwnProperty(cmd.toLowerCase())) {
             message = message.substring(0, i) + replacements[cmd] + message.substring(j);
             i = j + replacements[cmd].length - cmd.length - 1;
             break;
