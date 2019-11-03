@@ -1,68 +1,75 @@
 import React from 'react';
-import { Card, CardBody } from 'shards-react';
+import {
+  Card,
+  CardBody,
+} from 'shards-react';
 
 import auth from '../../api/auth';
-import { ChatRoom, PUBLIC_CHAT } from '../../api/ChatRoom';
 import TextBar from './TextBar';
 import Messages from './Messages';
 
 
 export default class ChatContainer extends React.Component {
-  constructor() {
+  constructor({ room }) {
     super();
-    this.chatroom = new ChatRoom({chatId: 'www.netflix.com', type: PUBLIC_CHAT});
     this.state = {
       message: '',
-      chatroom: 'www.netflix.com',
-      messages: []
+      room,
+      chat: null,
     };
   }
 
-  componentDidMount() {
-    this.setChatRoom('www.netflix.com');
-  }
-
-  setChatRoom(chatroom) {
-    this.chatroom.stopListening();
-    this.chatroom = new ChatRoom({chatId: chatroom, type: PUBLIC_CHAT});
-    this.setState({ messages: [] });
-    this.chatroom.startListening({
-      onChange: ({ messages }) => {
-        this.setState({ messages });
-      }
-    });
+  componentDidUpdate(prevProps) {
+    if (prevProps.room != this.props.room) {
+      this.changeRoom({ room: this.props.room });
+    }
   }
 
   handleKeyPress = (e) => {
-    if(e.keyCode === 13 && e.shiftKey === false) {
+    if (e.keyCode === 13 && e.shiftKey === false) {
       e.preventDefault();
       this.handleSubmit();
     }
   }
 
   handleSubmit = () => {
-    const {message} = this.state
+    const { chat, message } = this.state;
+    if (chat) {
+      chat.send({ message });
+      this.setState({ message: '' })
+    }
+  }
 
-    this.chatroom.send({ message, userId: auth.currentUser.email })
-    this.setState({message:''})
+  changeRoom({ room }) {
+    const { chat } = this.state;
+    if (chat) chat.disconnect();
+    if (!room) return;
+    this.setState({ room });
+    room.chat({ messageLimit: 20 }).then(newChat => {
+      this.setState({ chat: newChat });
+      newChat.onChange = c => this.setState({ chat: c });
+    });
   }
 
   render() {
-    const { chatroom, message, messages } = this.state;
-
+    const { room, chat, message } = this.state;
     return (
-      <div className="ChatContainer" style={{ height: '100vh' }}>
+      <div className="ChatContainer" style={{ height: '80%' }}>
+        <div className="Messages" style={{ height: '100%' }}>
+          <div style={{ height: '100%', overflowY: 'scroll' }}>
+            <Card style={{ width: '90%', margin: 'auto', marginTop: '10px' }}>
+              <CardBody>
+                Now Chatting on&nbsp;
+        	    	{room ? room.name : 'Loading...'}
+              </CardBody>
+            </Card>
+            <Messages
+              messages={chat ? chat.messages.slice().reverse() : []}
+              currentUser={auth.currentUser.email}
+            />
+          </div>
+        </div>
         <Card>
-          <CardBody>
-            Now Chatting on&nbsp;
-            {chatroom}
-          </CardBody>
-        </Card>
-        <Messages
-          messages={messages.slice().reverse()}
-          currentUser={auth.currentUser.email}
-        />
-        <Card style={{ position: 'sticky', margin: 'auto', bottom: '0px' }}>
           <TextBar
             handleChange={e => this.setState({ message: e.target.value })}
             handleSubmit={this.handleSubmit}

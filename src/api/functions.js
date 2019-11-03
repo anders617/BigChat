@@ -4,15 +4,18 @@ import 'firebase/functions';
 
 import app from './app';
 
-// Input: {message: `string`, chatroom: `string`}
+// Input: {message: `string`, roomID: `string`}
 const sendMessage = firebase.functions().httpsCallable('sendMessage');
-// Input: {otherEmail: `string`, message: `string`}
-const sendDirectMessage = firebase.functions().httpsCallable('sendDirectMessage');
-// Input: {email: `string`}
-const lookupUser = firebase.functions().httpsCallable('lookupUser');
+// Input: {friendId: `string`, message: `string` }
+const addFriend = firebase.functions().httpsCallable('addFriend');
+// Input: {}
+const createMe = firebase.functions().httpsCallable('createMe');
+// Input: {type: `string`, name: `string`}
+const createRoom = firebase.functions().httpsCallable('createRoom');
 
 export {
     sendMessage,
-    sendDirectMessage,
-    lookupUser,
+    addFriend,
+    createMe,
+    createRoom,
 };

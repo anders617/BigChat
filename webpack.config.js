@@ -7,10 +7,14 @@ module.exports = {
     host: 'localhost',
     port: 3000,
   },
-  entry: ['babel-polyfill', './src/index.jsx'],
+	entry: {
+		vendor: 'babel-polyfill',
+		index: './src/index.jsx',
+		background: './src/rpc/background.js',
+	},
 	output: {
 		path: __dirname + '/dist',
-		filename: 'main.js',
+		filename: '[name].js',
 	},
   module: {
     rules: [
@@ -43,11 +47,16 @@ module.exports = {
       template: './src/index.html',
       filename: './index.html',
     }),
+    new HtmlWebPackPlugin({
+      template: './src/popup.html',
+      filename: './popup.html',
+    }),
 		new EncodingPlugin({
 			encoding: 'ascii',
 		}),
 		new CopyPlugin([
 			{from: './src/contentscript.js', to: 'contentscript.js'},
+			{from: './manifest.json', to: 'manifest.json'},
 		]),
   ],
 };

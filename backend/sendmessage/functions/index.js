@@ -11,82 +11,29 @@ const app = admin.initializeApp({
   databaseURL: "https://bigchat-88c14.firebaseio.com",
 });
 
-const checkAuth = ({context}) => {
+const checkAuth = ({
+  context,
+}) => {
   if (!context.auth) {
     // Throwing an HttpsError so that the client gets the error details.
     throw new functions.https.HttpsError('failed-precondition', 'The function must be called ' +
-        'while authenticated.');
+      'while authenticated.');
   }
 };
 
-const checkString = ({str, msg = ''}) => {
+const checkString = ({
+  str,
+  msg = '',
+}) => {
   if (!(typeof str === 'string') || str.length === 0) {
     throw new functions.https.HttpsError('failed-precondition', msg);
   }
 }
 
-exports.listDirectMessageContacts = functions.https.onCall((data, context) => {
-  checkAuth({context});
-  const email = data.email;
-
-});
-
-exports.lookupUser = functions.https.onCall((data, context) => {
-  checkAuth({context});
-  const email = data.email;
-  checkString({str: email, msg: 'Inavlid email'});
-  console.log('Request', data);
-  return app.auth().getUserByEmail(email)
-    .then((user) => {
-      const res = {
-        uid: user.uid,
-        photoUrl: user.photoURL,
-        displayName: user.displayName,
-      };
-      console.log('Response', res);
-      return res;
-    }).catch(err => {
-      throw new functions.https.HttpsError('unknown', err.message);
-    })
-});
-
-exports.sendDirectMessage = functions.https.onCall((data, context) => {
-  // Checking that the user is authenticated.
-  checkAuth({context});
-  const message = data.message;
-  const otherEmail = data.otherEmail;
-  const email = context.auth.token.email;
-  checkString({str: message, msg: 'Message must be non empty string.'});
-  checkString({str: otherEmail, msg: 'Email must be non empty string'});
-  console.log(data);
-  app.auth().getUserByEmail(otherEmail)
-    .then((user) => {
-      let chatKey = context.auth.uid;
-      if (context.auth.uid < user.uid) {
-        chatKey += '-' + user.uid;
-      } else {
-        chatKey = user.uid + '-' + chatKey;
-      }
-      return addMessage({message, context, collectionId: 'directmessages', docId: chatKey});
-    }).catch(err => {
-      throw new functions.https.HttpsError('unknown', err.message)
-    });
-})
-
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-exports.sendMessage = functions.https.onCall((data, context) => {
-  // Checking that the user is authenticated.
-  checkAuth({context});
-  const message = data.message;
-  const chatroom = data.chatroom;
-  checkString({str: message, msg: 'Message must be non empty string.'});
-  checkString({str: chatroom, msg: 'Chatroom must be non empty string.'});
-  return addMessage({message, context, collectionId: 'chatrooms', docId: chatroom});
-});
-
-const expandMessage = ({original, context}) => {
+const expandMessage = ({
+  original,
+  context
+}) => {
   const replacements = {
     'shrug': '¯\\_(ツ)_/¯',
     'table': '(╯°□°）╯︵ ┻━┻',
@@ -98,12 +45,12 @@ const expandMessage = ({original, context}) => {
     'me': context.auth.token.name,
   };
   replacements['help'] = 'Try the following / commands: ' + Object.keys(replacements)
-      .filter((key) => replacements.hasOwnProperty(key))
-      .join('\n');
+    .filter((key) => replacements.hasOwnProperty(key))
+    .join('\n');
   let message = original;
-  for (let i = 0;i < message.length;i++) {
+  for (let i = 0; i < message.length; i++) {
     if (message[i] === '/') {
-      for (let j = i;j < message.length;j++) {
+      for (let j = i; j < message.length; j++) {
         if (message[j] === ' ' || j === message.length - 1) {
           if (j === message.length - 1) {
             j = j + 1;
@@ -121,22 +68,191 @@ const expandMessage = ({original, context}) => {
   return message;
 }
 
-const addMessage = ({message, context, collectionId, docId}) => {
-  return app.firestore()
-  .collection(collectionId)
-  .doc(docId)
-  .collection('messages')
-  .add({
-    message: expandMessage({original: message, context}),
-    userId: context.auth.token.email,
-    timestamp: admin.firestore.Timestamp.now(),
-    photoUrl: context.auth.token.picture,
-  }).then(newdoc => {
-    console.log('Success ', newdoc);
-    return { success: true };
-  })
-  .catch(err => {
-    console.log('Error', err);
-    throw new functions.https.HttpsError('unknown', 'Server error', err.message);
+exports.lookupUser = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
   });
+  const {
+    email,
+  } = data;
+  checkString({
+    str: email,
+    msg: 'Inavlid email'
+  });
+  const user = await app.auth().getUserByEmail(email);
+  return {
+    userID: user.uid,
+  };
+});
+
+// Input: {message: `string`, roomID: `string`}
+exports.sendMessage = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context
+  });
+  const {
+    roomID,
+    message
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Invalid room'
+  });
+  checkString({
+    str: message,
+    msg: 'Message cannot be empty'
+  });
+  await app.firestore()
+    .collection('rooms')
+    .doc(roomID)
+    .collection('messages')
+    .add({
+      message: expandMessage({
+        original: message,
+        context
+      }),
+      userID: context.auth.uid,
+      timestamp: admin.firestore.Timestamp.now(),
+      photoURL: context.auth.token.picture,
+    });
+  return {
+    success: true,
+  };
+});
+
+function makeFriends({
+  userId1,
+  userId2
+}) {
+  const friendRequest1 = app.firestore()
+    .collection('users')
+    .doc(userId2)
+    .collection('friendRequests')
+    .doc(userId1);
+  const friend1 = app.firestore()
+    .collection('users')
+    .doc(userId2)
+    .collection('friends')
+    .doc(userId1);
+  const friendRequest2 = app.firestore()
+    .collection('users')
+    .doc(userId1)
+    .collection('friendRequests')
+    .doc(userId2);
+  const friend2 = app.firestore()
+    .collection('users')
+    .doc(userId1)
+    .collection('friends')
+    .doc(userId2);
+  return app.firestore()
+    .batch()
+    .delete(friendRequest1)
+    .delete(friendRequest2)
+    .set(friend1, {})
+    .set(friend2, {})
+    .commit();
 }
+
+exports.addFriend = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    friendId,
+    message = '',
+  } = data;
+  const alreadyFriends = (await app.firestore()
+    .collection('users')
+    .doc(context.auth.uid)
+    .collection('friends')
+    .doc(friendId)
+    .get()).exists;
+  if (alreadyFriends) return {
+    success: true,
+  };
+  const hasFriendRequest = (await app.firestore()
+    .collection('users')
+    .doc(context.auth.uid)
+    .collection('friendRequests')
+    .doc(friendId)
+    .get()).exists;
+  if (hasFriendRequest) {
+    await makeFriends({
+      userId1: context.auth.uid,
+      userId2: friendId,
+    });
+  } else {
+    app.firestore()
+      .collection('users')
+      .doc(friendId)
+      .collection('friendRequests')
+      .doc(context.auth.uid)
+      .set({
+        message,
+        timestamp: admin.firestore.Timestamp.now(),
+      })
+  }
+  return {
+    success: true,
+  }
+});
+
+exports.createMe = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  await app.firestore()
+    .collection('users')
+    .doc(context.auth.uid)
+    .set({
+      name: context.auth.token.name,
+      photoURL: context.auth.token.picture,
+    }, {
+      merge: true,
+    });
+  return {
+    success: true
+  }
+});
+
+exports.createRoom = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    type,
+    name,
+  } = data;
+  checkString({
+    str: name,
+    msg: 'Room name cannot be empty',
+  });
+  if (!['PUBLIC', 'PRIVATE', 'DIRECT'].includes(type)) return {
+    success: false,
+    error: `${type} is not a valid room type`,
+  };
+  const roomRef = app.firestore()
+    .collection('rooms')
+    .doc();
+  const usersRef = roomRef
+    .collection('users')
+    .doc(context.auth.token.uid);
+  const roomsRef = app.firestore()
+    .collection('users')
+    .doc(context.auth.token.uid)
+    .collection('rooms')
+    .doc(roomRef.id);
+  await app.firestore()
+    .batch()
+    .set(roomRef, {
+      type,
+      name,
+    })
+    .set(roomsRef, {})
+    .set(usersRef, {})
+    .commit();
+  return {
+    success: true,
+    roomID: roomRef.id,
+  };
+})

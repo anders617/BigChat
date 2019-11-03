@@ -25,7 +25,7 @@ export default class Messages extends React.Component {
         <div key={message.id}>
           <Message
             message={message}
-            isOwnedByUser={currentUser === message.userId}
+            isOwnedByUser={currentUser === message.userID}
           />
           <br />
         </div>
@@ -35,7 +35,7 @@ export default class Messages extends React.Component {
     return (
       <div
         className="Messages"
-        style={{  overflowY: 'scroll' }}
+        style={{ overflowY: 'scroll' }}
       >
         <br />
         {messagesList}

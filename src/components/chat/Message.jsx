@@ -1,6 +1,7 @@
 import React from 'react';
 
 import { Card, CardBody } from 'shards-react';
+import Avatar from './Avatar';
 
 const ownCardStyle = {
   minHeight: '3em',
@@ -52,16 +53,6 @@ const otherBodyStyle = {
   justifyContent: 'flex-end'
 };
 
-const avatarStyle = {
-  height: 'auto', 
-  width: 'auto', 
-  maxWidth: '40px', 
-  maxHeight: '40px',
-  borderRadius: '50%',
-  float: 'left',
-  marginRight: '5px'
-}
-
 export default function Message({ message, isOwnedByUser }) {
   let messageCard = (
     <div>
@@ -76,7 +67,7 @@ export default function Message({ message, isOwnedByUser }) {
   if (!isOwnedByUser) {
     messageCard = (
       <div>
-        <img src={message.photoUrl} alt="avatar" style={ avatarStyle } />
+        <Avatar url={message.photoURL} />
         <Card style={otherCardStyle}>
           <CardBody style={otherBodyStyle}>
             {message.message}
@@ -86,9 +77,9 @@ export default function Message({ message, isOwnedByUser }) {
     );
   }
 
-    return (
-      <div className="Message">
-       {messageCard}
-      </div>
-    );
+  return (
+    <div className="Message">
+      {messageCard}
+    </div>
+  );
 }
