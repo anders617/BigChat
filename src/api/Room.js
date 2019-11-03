@@ -6,7 +6,13 @@ import db from './db';
 import auth from './auth';
 import {
 	createRoom as createRoomFn,
+	sendMessage as sendMessageFn,
 } from './functions'
+import analytics from './analytics';
+import {
+	SEND_MESSAGE,
+	CHAT_LISTEN
+} from './analyticsevents';
 
 export const Type = {
 	PUBLIC: 'PUBLIC',
@@ -65,6 +71,10 @@ export default class Room {
 	async chat({
 		messageLimit = 20,
 	}) {
+		analytics.logEvent(CHAT_LISTEN, {
+			type: this.type,
+			room: this.id,
+		});
 		const snapshot = await this.snapshot
 			.ref
 			.collection('messages')
@@ -74,6 +84,19 @@ export default class Room {
 		return new Chat({
 			id: this.id,
 			snapshot,
+		});
+	}
+
+	async sendMessage({
+		message,
+	}) {
+		analytics.logEvent(SEND_MESSAGE, {
+			type: this.type,
+			room: this.id,
+		});
+		await sendMessageFn({
+			roomID: this.id,
+			message,
 		});
 	}
 }

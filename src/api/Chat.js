@@ -1,7 +1,4 @@
 import db from './db';
-import {
-    sendMessage
-} from './functions'
 
 export default class Chat {
     constructor({
@@ -26,15 +23,6 @@ export default class Chat {
             const data = docSnap.data();
             data.id = docSnap.id;
             return data;
-        });
-    }
-
-    async send({
-        message,
-    }) {
-        await sendMessage({
-            roomID: this.id,
-            message,
         });
     }
 

@@ -33,9 +33,9 @@ export default class ChatContainer extends React.Component {
   }
 
   handleSubmit = () => {
-    const { chat, message } = this.state;
-    if (chat) {
-      chat.send({ message });
+    const { room, message } = this.state;
+    if (room) {
+      room.sendMessage({ message });
       this.setState({ message: '' })
     }
   }
