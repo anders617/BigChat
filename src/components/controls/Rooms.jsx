@@ -11,7 +11,7 @@ export default function Rooms({ user, currentRoom, changeRoom, open, toggle }) {
     }
     const roomsList = rooms.filter(room => room).map(room => (
         <ListGroupItem key={room.id} style={{ lineHeight: '2.5' }}>
-            {room.name}{room.id == currentRoom.id ? '*' : ''}
+            {room.name}{currentRoom && room.id == currentRoom.id ? '*' : ''}
             <Button onClick={() => { changeRoom(room); toggle(); }} style={{ float: 'right' }}>Join</Button>
         </ListGroupItem>
     ))

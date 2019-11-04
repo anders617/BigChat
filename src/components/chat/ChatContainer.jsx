@@ -59,8 +59,7 @@ export default class ChatContainer extends React.Component {
           <div style={{ height: '100%', overflowY: 'scroll' }}>
             <Card style={{ width: '90%', margin: 'auto', marginTop: '10px' }}>
               <CardBody>
-                Now Chatting on&nbsp;
-        	    	{room ? room.name : 'Loading...'}
+                Now Chatting on&nbsp;{room ? room.name : 'Loading...'}
               </CardBody>
             </Card>
             <Messages

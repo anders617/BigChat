@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, Row, Col, Navbar, Nav, NavItem } from 'shards-react';
 import UserIcon from './UserIcon';
 import Rooms from './Rooms';
+import Content from './Content';
 
 
 export default function Controls({ user, room, changeRoom }) {
-	const [streamsOpen, setStreamsOpen] = useState(false);
 	const [roomsOpen, setRoomsOpen] = useState(false);
+	const [contentOpen, setContentOpen] = useState(false);
+	const [friendsOpen, setFriendsOpen] = useState(false);
 	return (
 		<div>
 			<Container style={{}}>
@@ -17,10 +19,10 @@ export default function Controls({ user, room, changeRoom }) {
 								<Button onClick={() => { setRoomsOpen(!roomsOpen) }}>Rooms</Button>
 							</NavItem>
 							<NavItem>
-								<Button onClick={() => { setStreamsOpen(!streamsOpen) }}>Content</Button>
+								<Button onClick={() => { setContentOpen(!contentOpen) }}>Content</Button>
 							</NavItem>
 							<NavItem>
-								<Button onClick={() => { setStreamsOpen(!streamsOpen) }}>Friends</Button>
+								<Button onClick={() => { setFriendsOpen(!friendsOpen) }}>Friends</Button>
 							</NavItem>
 							<NavItem>
 								<UserIcon user={user} />
@@ -32,6 +34,7 @@ export default function Controls({ user, room, changeRoom }) {
 				</Row>
 			</Container>
 			<Rooms user={user} currentRoom={room} changeRoom={changeRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
+			<Content room={room} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
 		</div >
 	);
 }

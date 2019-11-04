@@ -252,4 +252,48 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
     success: true,
     roomID: roomRef.id,
   };
-})
+});
+
+exports.updateContent = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    roomID,
+    contentID,
+    state,
+    time,
+    lastUpdated,
+    sequence,
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Room ID is invalid',
+  });
+  checkString({
+    str: contentID,
+    msg: 'Content ID is invalid',
+  });
+  if (state && !['PLAYING', 'PAUSED'].includes(state)) throw new functions.https.HttpsError('invalid-argument', 'Invalid state');
+  const roomRef = app.firestore()
+    .collection('rooms')
+    .doc(roomID);
+  const inRoom = (await roomRef
+    .collection('users')
+    .doc(context.auth.uid)
+    .get()).exists;
+  if (!inRoom) throw new functions.https.HttpsError('failed-precondition', 'Permission denied');
+  const contentRef = roomRef.collection('content').doc(contentID);
+  const contentSnap = await contentRef.get();
+  if (contentSnap.data().sequence >= sequence) throw new functions.https.HttpsError('failed-precondition', 'Concurrent updates');
+  contentRef.update({
+    ...state && {
+      state
+    },
+    ...time != null && {
+      time
+    },
+    lastUpdated: admin.firestore.Timestamp.now(),
+    sequence, // : admin.firestore.FieldValue.increment(1),
+  });
+});

@@ -13,6 +13,7 @@ import {
 	SEND_MESSAGE,
 	CHAT_LISTEN
 } from './analyticsevents';
+import Content from './Content';
 
 export const Type = {
 	PUBLIC: 'PUBLIC',
@@ -43,6 +44,16 @@ export default class Room {
 				this.usersList = null;
 				this.onChangeFn(this);
 			});
+		this.contentList = null;
+		this.snapshot.ref
+			.collection('content')
+			.onSnapshot(contentSnapshot => {
+				this.contentList = contentSnapshot.docs;
+				this.onChangeFn(this);
+			}, () => {
+				this.contentList = null;
+				this.onChangeFn(this);
+			});
 	}
 
 	get users() {
@@ -55,6 +66,27 @@ export default class Room {
 
 	get type() {
 		return this.snapshot.data().type;
+	}
+
+	get content() {
+		if (this.contentList === null) return null;
+		return this.contentList.map(snapshot => new Content({
+			id: snapshot.id,
+			roomID: this.id,
+			snapshot
+		}));
+	}
+
+	async findContent({
+		id
+	}) {
+		const snapshot = await this.snapshot.ref.collection('content').doc(id).get();
+		if (!snapshot.exists) return null;
+		return new Content({
+			id,
+			roomID: this.id,
+			snapshot
+		});
 	}
 
 	/**

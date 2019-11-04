@@ -12,10 +12,12 @@ const addFriend = firebase.functions().httpsCallable('addFriend');
 const createMe = firebase.functions().httpsCallable('createMe');
 // Input: {type: `string`, name: `string`}
 const createRoom = firebase.functions().httpsCallable('createRoom');
+const updateContent = firebase.functions().httpsCallable('updateContent');
 
 export {
     sendMessage,
     addFriend,
     createMe,
     createRoom,
+    updateContent,
 };
