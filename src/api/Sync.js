@@ -57,7 +57,8 @@ export default class Sync {
         const expectedTime = this.content.state === State.PAUSED ?
             this.content.time :
             this.content.time + (Date.now() - this.content.lastUpdated.toDate()) / 1000;
-        if (Math.abs(expectedTime - time) < 1) return;
+        const state = await Call('controls.playing') ? State.PLAYING : State.PAUSED;
+        if (Math.abs(expectedTime - time) < 1 && state === this.content.state) return;
         const {
             sequence
         } = this;
@@ -65,6 +66,7 @@ export default class Sync {
             roomID: this.room.id,
             contentID: this.content.id,
             lastUpdated: Date.now(),
+            state,
             time,
             sequence: sequence + 1,
             leader: this.me.id,
