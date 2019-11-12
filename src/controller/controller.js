@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import 'babel-polyfill';
+import Call from '../rpc/rpc';
 
 function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
@@ -9,13 +10,13 @@ class HTMLMediaControls {
 	constructor() {
 		this.poll('video', 'audio').then(media => {
 			media.addEventListener('pause', () => {
-				chrome.runtime.sendMessage(chrome.runtime.id, ["content.pause"], {}, () => {});
+				Call('sync.pause');
 			});
 			media.addEventListener('play', () => {
-				chrome.runtime.sendMessage(chrome.runtime.id, ["content.play"], {}, () => {});
+				Call('sync.play');
 			});
 			media.addEventListener('seeked', () => {
-				chrome.runtime.sendMessage(chrome.runtime.id, ["content.seek", this.tell()], {}, () => {});
+				Call('sync.seek', this.tell());
 			});
 		});
 	}
@@ -123,9 +124,10 @@ class NetflixControls extends HTMLMediaControls {
 function ControlsFactory() {
 	const domain = document.URL.match(/(.+):\/\/(.+?)\/.*/)[2];
 	const mapping = {
-		'www.netflix.com': new NetflixControls()
+		'www.netflix.com': NetflixControls
 	};
-	return mapping[domain] || new HTMLMediaControls();
+	if (mapping[domain]) return new mapping[domain]();
+	return new HTMLMediaControls();
 }
 
 export {

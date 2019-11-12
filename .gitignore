@@ -92,3 +92,6 @@ public/
 
 # DynamoDB Local files
 .dynamodb/
+
+# VSCode configuration
+.vscode/

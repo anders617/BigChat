@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Controls from './controls/Controls';
 import ChatContainer from './chat/ChatContainer';
-import { Me } from '../api/User';
-import { findRoom } from '../api/Room';
 import Call, { register } from '../rpc/rpc';
+import { useRoom, useMe, useContent } from '../api/hooks';
 
 function extractFragmentInfo(url) {
     const fragment = url.split('#')[1];
@@ -17,48 +16,28 @@ function extractFragmentInfo(url) {
         }
     });
     return kv;
-
 }
 
 export default function AuthenticatedApp() {
-    const [user, setUser] = useState(null);
-    const [room, setRoom] = useState(null);
-    const [content, setContent] = useState(null);
-    const changeRoom = (newRoom) => {
-        if (room) room.onChange = () => { };
-        setRoom(newRoom);
-    }
-    const changeContent = (newContent) => {
-        console.log(`Registering content ${newContent}`);
-        register('content', newContent);
-        setContent(newContent);
-    }
+    const [roomID, setRoomID] = useState(null);
+    const room = useRoom(roomID);
+    const me = useMe();
+    const [contentID, setContentID] = useState(null);
+    const content = useContent(roomID, contentID);
+
     useEffect(() => {
-        Me().then(me => {
-            setUser(me);
-            me.onChange = setUser;
-        })
-        Call('controls.url').then(url => {
+        (async () => {
+            const url = await Call('controls.url');
             const kv = extractFragmentInfo(url);
-            if (kv.room) findRoom({ id: kv.room }).then(async newRoom => {
-                changeRoom(newRoom)
-                if (kv.content) {
-                    const newContent = await newRoom.findContent({ id: kv.content });
-                    if (newContent) {
-                        changeContent(newContent);
-                    }
-                }
-            });
-        });
-        // findRoom({ id: '68OEbNAZ0usmHWfLqu4r' }).then(r => {
-        //     setRoom(r);
-        //     r.onChange = setRoom;
-        // })
+            if (kv.room) setRoomID(kv.room);
+            if (kv.content) setContentID(kv.content);
+        })();
     }, []);
+
     return (
         <div style={{ height: '100%', width: '100%' }}>
-            <Controls user={user} room={room} changeRoom={changeRoom} />
-            <ChatContainer user={user} room={room} />
+            <Controls me={me} room={room} content={content} setRoom={setRoomID} />
+            <ChatContainer me={me} room={room} />
         </div>
     );
 }

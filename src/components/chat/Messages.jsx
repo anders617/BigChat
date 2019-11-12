@@ -16,7 +16,7 @@ export default class Messages extends React.Component {
   }
 
   render() {
-    const { currentUser, messages } = this.props;
+    const { me, messages } = this.props;
 
     const messagesList = messages.map(message => {
       // return <li key={message.id}>{message.message}</li>;
@@ -25,7 +25,7 @@ export default class Messages extends React.Component {
         <div key={message.id}>
           <Message
             message={message}
-            isOwnedByUser={currentUser === message.userID}
+            isOwnedByUser={me && me.id === message.userID}
           />
           <br />
         </div>

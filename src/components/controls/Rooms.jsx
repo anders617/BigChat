@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button } from 'shards-react';
 import User from '../../api/User';
-import Room, { findRoom } from '../../api/Room';
+import Room from '../../api/Room';
+import { useRoomIDs, useRooms } from '../../api/hooks';
 
-export default function Rooms({ user, currentRoom, changeRoom, open, toggle }) {
-    const [rooms, setRooms] = useState([]);
-    if (user && user.rooms) {
-        Promise.all(user.rooms.map(id => findRoom({ id }))).then(setRooms);
-    }
-    const roomsList = rooms.filter(room => room).map(room => (
+export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
+    const roomIDs = useRoomIDs(me && me.id);
+    const rooms = useRooms(roomIDs);
+    const roomComponents = rooms.filter(room => room).map(room => (
         <ListGroupItem key={room.id} style={{ lineHeight: '2.5' }}>
-            {room.name}{currentRoom && room.id == currentRoom.id ? '*' : ''}
-            <Button onClick={() => { changeRoom(room); toggle(); }} style={{ float: 'right' }}>Join</Button>
+            {room.name}
+            {currentRoom && room.id === currentRoom.id ? '*' : ''}
+            <Button onClick={() => { setRoom(room.id); toggle(); }} style={{ float: 'right' }}>Join</Button>
         </ListGroupItem>
     ))
     return (
@@ -21,7 +21,7 @@ export default function Rooms({ user, currentRoom, changeRoom, open, toggle }) {
                 <ModalHeader>Rooms</ModalHeader>
                 <ModalBody>
                     <ListGroup>
-                        {roomsList}
+                        {roomComponents}
                     </ListGroup>
                 </ModalBody>
             </Modal>
@@ -30,10 +30,12 @@ export default function Rooms({ user, currentRoom, changeRoom, open, toggle }) {
 }
 
 Rooms.propTypes = {
-    user: PropTypes.instanceOf(User),
+    me: PropTypes.instanceOf(User),
+    currentRoom: PropTypes.instanceOf(Room),
     open: PropTypes.bool.isRequired,
 };
 
 Rooms.defaultProps = {
-    user: null,
+    me: null,
+    currentRoom: null,
 };

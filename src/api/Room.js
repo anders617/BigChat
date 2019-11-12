@@ -1,9 +1,6 @@
-// import * as firebase from 'firebase/app';
-// import 'firebase/firestore';
+/* eslint-disable no-underscore-dangle */
 
-import Chat from './Chat';
 import db from './db';
-import auth from './auth';
 import {
 	createRoom as createRoomFn,
 	sendMessage as sendMessageFn,
@@ -14,6 +11,10 @@ import {
 	CHAT_LISTEN
 } from './analyticsevents';
 import Content from './Content';
+import Message from './Message';
+import {
+	updateArrayWithChanges
+} from './utils';
 
 export const Type = {
 	PUBLIC: 'PUBLIC',
@@ -24,99 +25,24 @@ export const Type = {
 export default class Room {
 	constructor({
 		id,
-		snapshot,
+		name,
+		type,
 	}) {
-		this.id = id;
-		this.snapshot = snapshot;
-		this.onChangeFn = () => {};
-		snapshot.ref.onSnapshot(async ss => {
-			this.snapshot = ss;
-			this.onChangeFn(this);
-		});
-		// Update the room's users on snapshot
-		this.usersList = null;
-		this.snapshot.ref
-			.collection('users')
-			.onSnapshot(usersSnapsot => {
-				this.usersList = usersSnapsot.docs.map(userSnap => userSnap.id);
-				this.onChangeFn(this);
-			}, () => {
-				this.usersList = null;
-				this.onChangeFn(this);
-			});
-		this.contentList = null;
-		this.snapshot.ref
-			.collection('content')
-			.onSnapshot(contentSnapshot => {
-				this.contentList = contentSnapshot.docs;
-				this.onChangeFn(this);
-			}, () => {
-				this.contentList = null;
-				this.onChangeFn(this);
-			});
+		this._id = id;
+		this._name = name;
+		this._type = type;
 	}
 
-	get users() {
-		return this.usersList;
+	get id() {
+		return this._id;
 	}
 
 	get name() {
-		return this.snapshot.data().name;
+		return this._name;
 	}
 
 	get type() {
-		return this.snapshot.data().type;
-	}
-
-	get content() {
-		if (this.contentList === null) return null;
-		return this.contentList.map(snapshot => new Content({
-			id: snapshot.id,
-			roomID: this.id,
-			snapshot
-		}));
-	}
-
-	async findContent({
-		id
-	}) {
-		const snapshot = await this.snapshot.ref.collection('content').doc(id).get();
-		if (!snapshot.exists) return null;
-		return new Content({
-			id,
-			roomID: this.id,
-			snapshot
-		});
-	}
-
-	/**
-	 * @param {(room: Room) => void} fn
-	 */
-	set onChange(fn) {
-		this.onChangeFn = fn
-	}
-
-	/**
-	 * @param {{messageLimit: number}}
-	 * @returns {Promise<Chat>}
-	 */
-	async chat({
-		messageLimit = 20,
-	}) {
-		analytics.logEvent(CHAT_LISTEN, {
-			type: this.type,
-			room: this.id,
-		});
-		const snapshot = await this.snapshot
-			.ref
-			.collection('messages')
-			.orderBy('timestamp', 'desc')
-			.limit(messageLimit)
-			.get();
-		return new Chat({
-			id: this.id,
-			snapshot,
-		});
+		return this._type;
 	}
 
 	async sendMessage({
@@ -131,27 +57,68 @@ export default class Room {
 			message,
 		});
 	}
+
 }
 
-/**
- * @param {{id: string}}
- * @returns {Promise<Room>}
- */
-export async function findRoom({
-	id,
-}) {
-	if (findRoom.cache[id]) return findRoom.cache[id];
-	const snapshot = await db.collection('rooms')
-		.doc(id)
-		.get();
-	if (!snapshot.exists) return null;
-	return new Room({
-		id,
-		snapshot,
+export function subscribeRoom(consumer, roomID) {
+	return db.collection('rooms')
+		.doc(roomID)
+		.onSnapshot(snapshot => {
+			consumer(new Room({
+				id: snapshot.id,
+				...snapshot.data(),
+			}));
+		});
+}
+
+export function subscribeUserIDs(consumer, roomID) {
+	return db.collection('rooms')
+		.doc(roomID)
+		.collection('users')
+		.onSnapshot(snapshot => {
+			consumer(snapshot.docs.map(doc => doc.id));
+		});
+}
+
+export function subscribeMessages(consumer, roomID, messageLimit = 20) {
+	const messages = [];
+	analytics.logEvent(CHAT_LISTEN, {
+		room: roomID,
 	});
+	return db.collection('rooms')
+		.doc(roomID)
+		.collection('messages')
+		.orderBy('timestamp', 'desc')
+		.limit(messageLimit)
+		.onSnapshot(snapshot => {
+			updateArrayWithChanges(messages, snapshot.docChanges());
+			consumer(messages.map(data => new Message(data)));
+		});
 }
 
-findRoom.cache = {};
+export function subscribeContents(consumer, roomID) {
+	const content = [];
+	return db.collection('rooms')
+		.doc(roomID)
+		.collection('content')
+		.onSnapshot(snapshot => {
+			updateArrayWithChanges(content, snapshot.docChanges());
+			consumer(content.map(data => new Content(data)));
+		});
+}
+
+export function subscribeContent(consumer, roomID, contentID) {
+	return db.collection('rooms')
+		.doc(roomID)
+		.collection('content')
+		.doc(contentID)
+		.onSnapshot(snapshot => {
+			consumer(new Content({
+				id: snapshot.id,
+				...snapshot.data(),
+			}));
+		});
+}
 
 export async function createRoom({
 	type,
@@ -162,7 +129,5 @@ export async function createRoom({
 		name,
 	});
 	if (!response.data.success) return null;
-	return findRoom({
-		id: response.data.roomID,
-	});
+	return response.data.roomID;
 }

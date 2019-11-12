@@ -5,7 +5,7 @@ import Rooms from './Rooms';
 import Content from './Content';
 
 
-export default function Controls({ user, room, changeRoom }) {
+export default function Controls({ me, room, content, setRoom }) {
 	const [roomsOpen, setRoomsOpen] = useState(false);
 	const [contentOpen, setContentOpen] = useState(false);
 	const [friendsOpen, setFriendsOpen] = useState(false);
@@ -25,7 +25,7 @@ export default function Controls({ user, room, changeRoom }) {
 								<Button onClick={() => { setFriendsOpen(!friendsOpen) }}>Friends</Button>
 							</NavItem>
 							<NavItem>
-								<UserIcon user={user} />
+								<UserIcon user={me} />
 							</NavItem>
 						</Nav>
 					</Col>
@@ -33,8 +33,8 @@ export default function Controls({ user, room, changeRoom }) {
 				<Row>
 				</Row>
 			</Container>
-			<Rooms user={user} currentRoom={room} changeRoom={changeRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
-			<Content room={room} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
+			<Rooms me={me} currentRoom={room} setRoom={setRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
+			<Content room={room} me={me} content={content} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
 		</div >
 	);
 }

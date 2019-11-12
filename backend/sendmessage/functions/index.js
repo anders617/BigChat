@@ -265,6 +265,7 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
     time,
     lastUpdated,
     sequence,
+    leader,
   } = data;
   checkString({
     str: roomID,
@@ -275,25 +276,32 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
     msg: 'Content ID is invalid',
   });
   if (state && !['PLAYING', 'PAUSED'].includes(state)) throw new functions.https.HttpsError('invalid-argument', 'Invalid state');
-  const roomRef = app.firestore()
-    .collection('rooms')
-    .doc(roomID);
-  const inRoom = (await roomRef
-    .collection('users')
-    .doc(context.auth.uid)
-    .get()).exists;
-  if (!inRoom) throw new functions.https.HttpsError('failed-precondition', 'Permission denied');
+  const roomRef = app.firestore().collection('rooms').doc(roomID);
   const contentRef = roomRef.collection('content').doc(contentID);
-  const contentSnap = await contentRef.get();
-  if (contentSnap.data().sequence >= sequence) throw new functions.https.HttpsError('failed-precondition', 'Concurrent updates');
-  contentRef.update({
-    ...state && {
-      state
-    },
-    ...time != null && {
-      time
-    },
-    lastUpdated: admin.firestore.Timestamp.now(),
-    sequence, // : admin.firestore.FieldValue.increment(1),
-  });
+  try {
+    app.firestore().runTransaction(async transaction => {
+      const inRoom = (await transaction.get(roomRef.collection('users').doc(context.auth.uid))).exists;
+      if (!inRoom) throw "Not in room";
+      const currentContent = await transaction.get(contentRef);
+      if (currentContent.data().sequence >= sequence) throw "Concurrent update";
+      return transaction.update(contentRef, {
+        ...state && {
+          state
+        },
+        ...time !== null && {
+          time
+        },
+        ...sequence && {
+          sequence
+        },
+        ...leader && {
+          leader
+        },
+        lastUpdated: admin.firestore.Timestamp.fromMillis(lastUpdated),
+      });
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', 'Transaction failed');
+  }
 });
