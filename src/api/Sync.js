@@ -8,6 +8,17 @@ import {
     updateContent
 } from "./functions";
 
+async function now() {
+    const clientTimestamp = Date.now();
+    const resp = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', {
+        method: 'GET',
+    });
+    const responseTimestamp = Date.now();
+    const serverTimestamp = Date.parse((await resp.json()).utc_datetime);
+    const adjustedTimestamp = serverTimestamp + (responseTimestamp - clientTimestamp) / 2;
+    return adjustedTimestamp;
+}
+
 export default class Sync {
     constructor() {
         this.sequence = 0;
@@ -22,7 +33,7 @@ export default class Sync {
         await updateContent({
             roomID: this.room.id,
             contentID: this.content.id,
-            lastUpdated: Date.now(),
+            lastUpdated: await now(),
             state: State.PLAYING,
             time: await Call('controls.tell'),
             sequence: sequence + 1,
@@ -41,7 +52,7 @@ export default class Sync {
         await updateContent({
             roomID: this.room.id,
             contentID: this.content.id,
-            lastUpdated: Date.now(),
+            lastUpdated: await now(),
             state: State.PAUSED,
             time: await Call('controls.tell'),
             sequence: sequence + 1,
@@ -56,7 +67,7 @@ export default class Sync {
         if (!this.content || !this.room || !this.me) return;
         const expectedTime = this.content.state === State.PAUSED ?
             this.content.time :
-            this.content.time + (Date.now() - this.content.lastUpdated.toDate()) / 1000;
+            this.content.time + ((await now()) - this.content.lastUpdated.toDate()) / 1000;
         const state = await Call('controls.playing') ? State.PLAYING : State.PAUSED;
         if (Math.abs(expectedTime - time) < 1 && state === this.content.state) return;
         const {
@@ -65,7 +76,7 @@ export default class Sync {
         await updateContent({
             roomID: this.room.id,
             contentID: this.content.id,
-            lastUpdated: Date.now(),
+            lastUpdated: await now(),
             state,
             time,
             sequence: sequence + 1,
@@ -93,7 +104,7 @@ export default class Sync {
         const time = await Call('controls.tell');
         const desiredTime = content.state === State.PAUSED ?
             content.time :
-            content.time + (Date.now() - content.lastUpdated.toDate()) / 1000;
+            content.time + ((await now()) - content.lastUpdated.toDate()) / 1000;
         if (Math.abs(time - desiredTime) >= 1) {
             await Call('controls.seek', desiredTime);
         }
