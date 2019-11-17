@@ -9,15 +9,20 @@ import {
 } from "./functions";
 
 async function now() {
-    const clientTimestamp = Date.now();
-    const resp = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', {
-        method: 'GET',
-    });
-    const responseTimestamp = Date.now();
-    const serverTimestamp = Date.parse((await resp.json()).utc_datetime);
-    const adjustedTimestamp = serverTimestamp + (responseTimestamp - clientTimestamp) / 2;
-    return adjustedTimestamp;
+    if (now.offset === -1) {
+        const clientTimestamp = Date.now();
+        const resp = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', {
+            method: 'GET',
+        });
+        const responseTimestamp = Date.now();
+        const serverTimestamp = Date.parse((await resp.json()).utc_datetime);
+        const adjustedTimestamp = serverTimestamp + (responseTimestamp - clientTimestamp) / 2;
+        const offset = adjustedTimestamp - responseTimestamp;
+        now.offset = offset;
+    }
+    return Date.now() + now.offset;
 }
+now.offset = -1;
 
 export default class Sync {
     constructor() {
