@@ -11,7 +11,12 @@ import {
 } from './Room';
 import {
     subscribeMe,
-    subscribeRoomIDs
+    subscribeRoomIDs,
+    subscribeFriendIDs,
+    subscribeUser,
+    subscribeUserQuery,
+    subscribeUserNamePrefix,
+    subscribeFriendRequests
 } from './User';
 
 export function useRoom(roomID) {
@@ -96,4 +101,65 @@ export function useContents(roomID) {
     }, [roomID]);
 
     return contents;
+}
+
+export function useFriendIDs(userID) {
+    const [friendIDs, setFriendIDs] = useState([]);
+
+    useEffect(() => {
+        if (!userID) return () => {};
+        return subscribeFriendIDs(setFriendIDs, userID);
+    }, [userID]);
+
+    return friendIDs;
+}
+
+export function useUsers(userIDs) {
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        const newUsers = Array(userIDs.length).fill(null);
+        const unsubscribes = userIDs.map((userID, i) => subscribeUser(user => {
+            newUsers[i] = user;
+        }, userID));
+        setUsers(newUsers);
+        return () => {
+            unsubscribes.forEach(unsubscribe => {
+                unsubscribe();
+            });
+        };
+    }, [userIDs]);
+
+    return users;
+}
+
+export function useUserQuery(filters) {
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        return subscribeUserQuery(setUsers, filters || []);
+    }, [filters]);
+
+    return users;
+}
+
+export function useUsersByName(prefix) {
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        return subscribeUserNamePrefix(setUsers, prefix);
+    }, [prefix]);
+
+    return users;
+}
+
+export function useFriendRequests(userID) {
+    const [friendRequests, setFriendRequests] = useState([]);
+
+    useEffect(() => {
+        if (userID === null) return () => {};
+        return subscribeFriendRequests(setFriendRequests, userID);
+    }, [userID]);
+
+    return friendRequests;
 }

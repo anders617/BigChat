@@ -37,7 +37,7 @@ export default function AuthenticatedApp() {
     return (
         <div style={{ height: '100%', width: '100%' }}>
             <Controls me={me} room={room} content={content} setRoom={setRoomID} />
-            <ChatContainer me={me} room={room} />
+            <ChatContainer me={me} room={room} roomID={roomID} />
         </div>
     );
 }

@@ -11,8 +11,13 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
     const roomComponents = rooms.filter(room => room).map(room => (
         <ListGroupItem key={room.id} style={{ lineHeight: '2.5' }}>
             {room.name}
-            {currentRoom && room.id === currentRoom.id ? '*' : ''}
-            <Button onClick={() => { setRoom(room.id); toggle(); }} style={{ float: 'right' }}>Join</Button>
+            <Button
+                disabled={currentRoom && room.id === currentRoom.id}
+                onClick={() => { setRoom(room.id); toggle(); }}
+                style={{ float: 'right' }}
+            >
+                Join
+            </Button>
         </ListGroupItem>
     ))
     return (

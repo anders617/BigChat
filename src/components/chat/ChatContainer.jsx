@@ -9,7 +9,7 @@ import TextBar from './TextBar';
 import Messages from './Messages';
 import { useMessages } from '../../api/hooks';
 
-export default function ChatContainer({ me, room }) {
+export default function ChatContainer({ me, room, roomID }) {
     const messages = useMessages(room && room.id);
     const [message, setMessage] = useState('');
 
@@ -32,10 +32,16 @@ export default function ChatContainer({ me, room }) {
             <div className="Messages" style={{ height: '100%' }}>
                 <div style={{ height: '100%', overflowY: 'scroll' }}>
                     <Card style={{ width: '90%', margin: 'auto', marginTop: '10px' }}>
-                        <CardBody>
-                            Now Chatting on&nbsp;
-                            {room ? room.name : 'Loading...'}
-                        </CardBody>
+                        {roomID ? (
+                            <CardBody>
+                                Now Chatting on
+                                {room ? ` ${room.name}` : ' Loading...'}
+                            </CardBody>
+                        ) : (
+                                <CardBody>
+                                    Please join a room.
+                            </CardBody>
+                            )}
                     </Card>
                     <Messages messages={messages.slice().reverse()} me={me} />
                 </div>

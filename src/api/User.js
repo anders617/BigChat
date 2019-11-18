@@ -92,3 +92,35 @@ export function subscribeFriendRequests(consumer, userID) {
             consumer(friendRequests.map(data => new FriendRequest(data)));
         });
 }
+
+export function subscribeUserQuery(consumer, filters) {
+    const users = [];
+    let query = db.collection('users');
+    filters.forEach(filter => {
+        query = query.where(...filter)
+    })
+    return query.limit(50).onSnapshot(snapshot => {
+        updateArrayWithChanges(users, snapshot.docChanges());
+        consumer(users.map(data => new User(data)));
+    });
+}
+
+export function subscribeUserNamePrefix(consumer, prefix) {
+    const users = [];
+    if (prefix.length === 0)
+        return db.collection('users')
+            .limit(50)
+            .onSnapshot(snapshot => {
+                updateArrayWithChanges(users, snapshot.docChanges());
+                consumer(users.map(data => new User(data)));
+            });
+    const end = prefix.substr(0, prefix.length - 1) + String.fromCharCode(prefix.charCodeAt(prefix.length - 1) + 1);
+    return db.collection('users')
+        .where('name_lower', '>=', prefix)
+        .where('name_lower', '<', end)
+        .limit(50)
+        .onSnapshot(snapshot => {
+            updateArrayWithChanges(users, snapshot.docChanges());
+            consumer(users.map(data => new User(data)));
+        });
+}

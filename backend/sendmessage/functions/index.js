@@ -4,7 +4,12 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Cloud Firestore.
 const admin = require('firebase-admin');
 
-const app = admin.initializeApp();
+const serviceAccount = require("./serviceAccountKey.json");
+
+const app = admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://bigchat-88c14.firebaseio.com",
+});
 
 const checkAuth = ({
   context,
@@ -118,29 +123,29 @@ exports.sendMessage = functions.https.onCall(async (data, context) => {
 });
 
 function makeFriends({
-  userId1,
-  userId2
+  userID1,
+  userID2
 }) {
   const friendRequest1 = app.firestore()
     .collection('users')
-    .doc(userId2)
+    .doc(userID2)
     .collection('friendRequests')
-    .doc(userId1);
+    .doc(userID1);
   const friend1 = app.firestore()
     .collection('users')
-    .doc(userId2)
+    .doc(userID2)
     .collection('friends')
-    .doc(userId1);
+    .doc(userID1);
   const friendRequest2 = app.firestore()
     .collection('users')
-    .doc(userId1)
+    .doc(userID1)
     .collection('friendRequests')
-    .doc(userId2);
+    .doc(userID2);
   const friend2 = app.firestore()
     .collection('users')
-    .doc(userId1)
+    .doc(userID1)
     .collection('friends')
-    .doc(userId2);
+    .doc(userID2);
   return app.firestore()
     .batch()
     .delete(friendRequest1)
@@ -155,14 +160,14 @@ exports.addFriend = functions.https.onCall(async (data, context) => {
     context,
   });
   const {
-    friendId,
+    friendID,
     message = '',
   } = data;
   const alreadyFriends = (await app.firestore()
     .collection('users')
     .doc(context.auth.uid)
     .collection('friends')
-    .doc(friendId)
+    .doc(friendID)
     .get()).exists;
   if (alreadyFriends) return {
     success: true,
@@ -171,17 +176,17 @@ exports.addFriend = functions.https.onCall(async (data, context) => {
     .collection('users')
     .doc(context.auth.uid)
     .collection('friendRequests')
-    .doc(friendId)
+    .doc(friendID)
     .get()).exists;
   if (hasFriendRequest) {
     await makeFriends({
-      userId1: context.auth.uid,
-      userId2: friendId,
+      userID1: context.auth.uid,
+      userID2: friendID,
     });
   } else {
     app.firestore()
       .collection('users')
-      .doc(friendId)
+      .doc(friendID)
       .collection('friendRequests')
       .doc(context.auth.uid)
       .set({
@@ -189,6 +194,49 @@ exports.addFriend = functions.https.onCall(async (data, context) => {
         timestamp: admin.firestore.Timestamp.now(),
       })
   }
+  return {
+    success: true,
+  }
+});
+
+function removeFriends(userID1, userID2) {
+  const friendRequest1 = app.firestore()
+    .collection('users')
+    .doc(userID2)
+    .collection('friendRequests')
+    .doc(userID1);
+  const friend1 = app.firestore()
+    .collection('users')
+    .doc(userID2)
+    .collection('friends')
+    .doc(userID1);
+  const friendRequest2 = app.firestore()
+    .collection('users')
+    .doc(userID1)
+    .collection('friendRequests')
+    .doc(userID2);
+  const friend2 = app.firestore()
+    .collection('users')
+    .doc(userID1)
+    .collection('friends')
+    .doc(userID2);
+  return app.firestore()
+    .batch()
+    .delete(friendRequest1)
+    .delete(friendRequest2)
+    .delete(friend1)
+    .delete(friend2)
+    .commit();
+}
+
+exports.removeFriend = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    friendID,
+  } = data;
+  removeFriends(context.auth.uid, friendID);
   return {
     success: true,
   }
@@ -203,6 +251,7 @@ exports.createMe = functions.https.onCall(async (data, context) => {
     .doc(context.auth.uid)
     .set({
       name: context.auth.token.name,
+      name_lower: context.auth.token.name.toLowerCase(),
       photoURL: context.auth.token.picture,
     }, {
       merge: true,
