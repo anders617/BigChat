@@ -13,5 +13,7 @@ export const createMe = firebase.functions().httpsCallable('createMe');
 // Input: {type: `string`, name: `string`}
 export const createRoom = firebase.functions().httpsCallable('createRoom');
 export const updateContent = firebase.functions().httpsCallable('updateContent');
-// Input {type: `string`, name: `friendID`}
+// Input {friendID: `string`}
 export const removeFriend = firebase.functions().httpsCallable('removeFriend');
+// Input {roomID: `string`, userID: `string`}
+export const addUserToRoom = firebase.functions().httpsCallable('addUserToRoom');

@@ -8,6 +8,7 @@ import {
     subscribeMessages,
     subscribeContent,
     subscribeContents,
+    subscribeUserIDs,
 } from './Room';
 import {
     subscribeMe,
@@ -47,6 +48,17 @@ export function useRooms(roomIDs) {
     }, [roomIDs]);
 
     return rooms;
+}
+
+export function useRoomUserIDs(roomID) {
+    const [userIDs, setUserIDs] = useState([]);
+
+    useEffect(() => {
+        if (roomID === null) return () => {};
+        return subscribeUserIDs(setUserIDs, roomID);
+    }, [roomID]);
+
+    return userIDs;
 }
 
 export function useRoomIDs(userID) {

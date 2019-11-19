@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button } from 'shards-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import User from '../../api/User';
 import Room from '../../api/Room';
 import { useRoomIDs, useRooms } from '../../api/hooks';
+import CreateRoom from './CreateRoom';
+
+const sheet = window.document.styleSheets[0];
+sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
 
 export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
     const roomIDs = useRoomIDs(me && me.id);
     const rooms = useRooms(roomIDs);
+    const [createOpen, setCreateOpen] = useState(false);
+
     const roomComponents = rooms.filter(room => room).map(room => (
         <ListGroupItem key={room.id} style={{ lineHeight: '2.5' }}>
             {room.name}
@@ -23,13 +31,23 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
     return (
         <div>
             <Modal open={open} toggle={toggle}>
-                <ModalHeader>Rooms</ModalHeader>
+                <ModalHeader className="rooms-modal-header" style={{ width: '100%' }}>
+                    Rooms
+                    <Button
+                        title="Create room"
+                        style={{ float: 'right' }}
+                        onClick={() => { toggle(); setCreateOpen(true) }}
+                    >
+                        <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                </ModalHeader>
                 <ModalBody>
                     <ListGroup>
                         {roomComponents}
                     </ListGroup>
                 </ModalBody>
             </Modal>
+            <CreateRoom open={createOpen} toggle={() => setCreateOpen(!createOpen)} />
         </div>
     );
 }

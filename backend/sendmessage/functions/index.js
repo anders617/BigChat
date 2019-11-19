@@ -268,10 +268,8 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
     str: name,
     msg: 'Room name cannot be empty',
   });
-  if (!['PUBLIC', 'PRIVATE', 'DIRECT'].includes(type)) return {
-    success: false,
-    error: `${type} is not a valid room type`,
-  };
+  if (!['PUBLIC', 'PRIVATE', 'DIRECT'].includes(type))
+    throw new functions.https.HttpsError('invalid-argument', `${type} is not a valid room type`);
   const roomRef = app.firestore()
     .collection('rooms')
     .doc();
@@ -295,6 +293,49 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
   return {
     success: true,
     roomID: roomRef.id,
+  };
+});
+
+exports.addUserToRoom = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    roomID,
+    userID,
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Invalid room ID',
+  });
+  checkString({
+    str: userID,
+    msg: 'Invalid user ID',
+  });
+  try {
+    app.firestore().runTransaction(async transaction => {
+      const roomRef = app.firestore().collection('rooms').doc(roomID);
+      const userRef = app.firestore().collection('users').doc(userID);
+      const currentUserRef = app.firestore().collection('users').doc(context.auth.uid);
+      const roomCurrentUserRef = roomRef.collection('users').doc(currentUserRef.id);
+      const [room, user, currentUser, roomCurrentUser] = await transaction.getAll(roomRef, userRef, currentUserRef, roomCurrentUserRef);
+      if (!room.exists) throw new Error(`Room does not exist ${room.id}`);
+      if (!user.exists) throw new Error(`User does not exist ${user.id}`);
+      if (!currentUser.exists) throw new Error(`Current user does not exist ${currentUser.id}`);
+      if (room.data().type === 'DIRECT') throw new Error('Cannot add user to direct message');
+      if (room.data().type === 'PRIVATE' && !roomCurrentUser.exists) throw new Error('Not authorized to add user to private room');
+      const roomNewUserRef = roomRef.collection('users').doc(user.id);
+      const userNewRoomRef = userRef.collection('rooms').doc(room.id)
+      transaction
+        .set(roomNewUserRef, {})
+        .set(userNewRoomRef, {});
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', e.message);
+  }
+  return {
+    success: true,
   };
 });
 

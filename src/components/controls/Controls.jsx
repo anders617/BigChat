@@ -34,7 +34,7 @@ export default function Controls({ me, room, content, setRoom }) {
 			</Container>
 			<Rooms me={me} currentRoom={room} setRoom={setRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
 			<Content room={room} me={me} content={content} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
-			<Friends me={me} open={friendsOpen} toggle={() => { setFriendsOpen(!friendsOpen) }} />
+			<Friends me={me} room={room} open={friendsOpen} toggle={() => { setFriendsOpen(!friendsOpen) }} />
 		</div >
 	);
 }

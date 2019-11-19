@@ -16,12 +16,13 @@ export default function AddFriends({ me, friendIDs, open, toggle }) {
     const [selectedFriend, setSelectedFriend] = useState(null);
 
     const userComponents = users
-        .filter(user => me && user.id !== me.id && !friendIDs.includes(user.id))
+        .filter(user => user && me && user.id !== me.id && !friendIDs.includes(user.id))
         .map(user => (
             <ListGroupItem key={user.id}>
                 <Avatar url={user.photoURL} />
                 {user.name}
                 <Button
+                    title="Send friend request"
                     style={{ float: 'right' }}
                     onClick={() => { toggle(); setSendRequestOpen(true); setSelectedFriend(user); }}
                 >

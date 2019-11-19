@@ -37,9 +37,8 @@ export default function SendFriendRequest({ friend, open, toggle }) {
                     />
                     <br />
                     <div style={{ float: 'right' }}>
-                        <Button theme="danger" onClick={cancel}>Cancel</Button>
-                        {'      '}
-                        <Button onClick={send}>Send</Button>
+                        <Button style={{ marginLeft: '4px' }} theme="danger" onClick={cancel}>Cancel</Button>
+                        <Button style={{ marginLeft: '4px' }} onClick={send}>Send</Button>
                     </div>
                 </ModalBody>
             </Modal>
