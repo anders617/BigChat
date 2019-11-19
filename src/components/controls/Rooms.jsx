@@ -7,6 +7,7 @@ import User from '../../api/User';
 import Room from '../../api/Room';
 import { useRoomIDs, useRooms } from '../../api/hooks';
 import CreateRoom from './CreateRoom';
+import { removeUserFromRoom } from '../../api/functions';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
@@ -22,9 +23,16 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
             <Button
                 disabled={currentRoom && room.id === currentRoom.id}
                 onClick={() => { setRoom(room.id); toggle(); }}
-                style={{ float: 'right' }}
+                style={{ float: 'right', marginLeft: '4px' }}
             >
                 Join
+            </Button>
+            <Button
+                theme="danger"
+                onClick={() => removeUserFromRoom({ roomID: room.id, userID: me && me.id })}
+                style={{ float: 'right', marginLeft: '4px' }}
+            >
+                Leave
             </Button>
         </ListGroupItem>
     ))

@@ -17,3 +17,5 @@ export const updateContent = firebase.functions().httpsCallable('updateContent')
 export const removeFriend = firebase.functions().httpsCallable('removeFriend');
 // Input {roomID: `string`, userID: `string`}
 export const addUserToRoom = firebase.functions().httpsCallable('addUserToRoom');
+// Input {roomID: `string`, userID: `string`}
+export const removeUserFromRoom = firebase.functions().httpsCallable('removeUserFromRoom');

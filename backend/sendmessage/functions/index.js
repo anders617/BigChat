@@ -339,6 +339,46 @@ exports.addUserToRoom = functions.https.onCall(async (data, context) => {
   };
 });
 
+exports.removeUserFromRoom = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    roomID,
+    userID,
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Invalid room ID',
+  });
+  checkString({
+    str: userID,
+    msg: 'Invalid user ID',
+  });
+  if (userID !== context.auth.uid)
+    throw new functions.https.HttpsError('permission-denied', `Cannot remove user ${userID} from a room`);
+  try {
+    app.firestore().runTransaction(async transaction => {
+      const roomRef = app.firestore().collection('rooms').doc(roomID);
+      const userRef = app.firestore().collection('users').doc(userID);
+      const [room, user] = await transaction.getAll(roomRef, userRef);
+      if (!room.exists) throw new Error(`Room does not exist ${room.id}`);
+      if (!user.exists) throw new Error(`User does not exist ${user.id}`);
+      const roomUserRef = roomRef.collection('users').doc(user.id);
+      const userRoomRef = userRef.collection('rooms').doc(room.id);
+      const users = await transaction.get(roomRef.collection('users').limit(2));
+      const deleteRoom = users.size === 1 && users.docs[0].id === userID;
+      transaction
+        .delete(roomUserRef)
+        .delete(userRoomRef);
+      if (deleteRoom) transaction.delete(roomRef);
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', e.message);
+  }
+});
+
 exports.updateContent = functions.https.onCall(async (data, context) => {
   checkAuth({
     context,
