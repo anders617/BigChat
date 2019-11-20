@@ -32,6 +32,7 @@ export default class Sync {
 
     async play() {
         if (!this.content || !this.room || !this.me || this.content.state === State.PLAYING) return;
+        console.log('Sending play command');
         const {
             sequence
         } = this;
@@ -51,6 +52,7 @@ export default class Sync {
 
     async pause() {
         if (!this.content || !this.room || !this.me || this.content.state === State.PAUSED) return;
+        console.log('Sending pause command');
         const {
             sequence
         } = this;
@@ -75,6 +77,7 @@ export default class Sync {
             this.content.time + ((await now()) - this.content.lastUpdated.toDate()) / 1000;
         const state = await Call('controls.playing') ? State.PLAYING : State.PAUSED;
         if (Math.abs(expectedTime - time) < 1 && state === this.content.state) return;
+        console.log('Sending seek command');
         const {
             sequence
         } = this;
@@ -101,9 +104,11 @@ export default class Sync {
         this.me = me;
         register('sync', this);
         if (content.state === State.PAUSED && !await Call('controls.paused')) {
+            console.log('Received pause command');
             await Call('controls.pause');
         }
         if (content.state === State.PLAYING && !await Call('controls.playing')) {
+            console.log('Received play command');
             await Call('controls.play');
         }
         const time = await Call('controls.tell');
@@ -111,6 +116,7 @@ export default class Sync {
             content.time :
             content.time + ((await now()) - content.lastUpdated.toDate()) / 1000;
         if (Math.abs(time - desiredTime) >= 1) {
+            console.log('Received seek command');
             await Call('controls.seek', desiredTime);
         }
     }

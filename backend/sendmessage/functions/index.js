@@ -313,7 +313,7 @@ exports.addUserToRoom = functions.https.onCall(async (data, context) => {
     msg: 'Invalid user ID',
   });
   try {
-    app.firestore().runTransaction(async transaction => {
+    await app.firestore().runTransaction(async transaction => {
       const roomRef = app.firestore().collection('rooms').doc(roomID);
       const userRef = app.firestore().collection('users').doc(userID);
       const currentUserRef = app.firestore().collection('users').doc(context.auth.uid);
@@ -358,7 +358,7 @@ exports.removeUserFromRoom = functions.https.onCall(async (data, context) => {
   if (userID !== context.auth.uid)
     throw new functions.https.HttpsError('permission-denied', `Cannot remove user ${userID} from a room`);
   try {
-    app.firestore().runTransaction(async transaction => {
+    await app.firestore().runTransaction(async transaction => {
       const roomRef = app.firestore().collection('rooms').doc(roomID);
       const userRef = app.firestore().collection('users').doc(userID);
       const [room, user] = await transaction.getAll(roomRef, userRef);
@@ -404,7 +404,7 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
   const roomRef = app.firestore().collection('rooms').doc(roomID);
   const contentRef = roomRef.collection('content').doc(contentID);
   try {
-    app.firestore().runTransaction(async transaction => {
+    await app.firestore().runTransaction(async transaction => {
       const inRoom = (await transaction.get(roomRef.collection('users').doc(context.auth.uid))).exists;
       if (!inRoom) throw "Not in room";
       const currentContent = await transaction.get(contentRef);
