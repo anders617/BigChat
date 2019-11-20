@@ -7,6 +7,7 @@ import { useFriendIDs, useUsers, useFriendRequests, useRoomUserIDs } from '../..
 import AddFriends from './AddFriends';
 import { addFriend, removeFriend, addUserToRoom } from '../../api/functions';
 import { Type } from '../../api/Room';
+import AnimatedButton from './AnimatedButton';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.friends-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
@@ -59,21 +60,21 @@ export default function Friends({ me, room, open, toggle }) {
         <ListGroupItem key={friend.id}>
             <Avatar url={friend.photoURL} />
             {friend.name}
-            <Button
+            <AnimatedButton
                 title="Remove friend"
                 style={{ float: 'right', marginLeft: '4px' }}
                 onClick={() => removeFriend({ friendID: friend.id })}
             >
                 <FontAwesomeIcon icon={faUserTimes} />
-            </Button>
-            <Button
+            </AnimatedButton>
+            <AnimatedButton
                 disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
                 title="Invite to current room"
                 style={{ float: 'right', marginLeft: '4px' }}
                 onClick={() => addUserToRoom({ roomID: room.id, userID: friend.id })}
             >
                 <FontAwesomeIcon icon={faEnvelope} />
-            </Button>
+            </AnimatedButton>
         </ListGroupItem>
     ));
 

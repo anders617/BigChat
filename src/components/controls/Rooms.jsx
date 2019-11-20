@@ -8,6 +8,7 @@ import Room from '../../api/Room';
 import { useRoomIDs, useRooms } from '../../api/hooks';
 import CreateRoom from './CreateRoom';
 import { removeUserFromRoom } from '../../api/functions';
+import AnimatedButton from './AnimatedButton';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
@@ -27,15 +28,17 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
             >
                 Join
             </Button>
-            <Button
+            <AnimatedButton
                 theme="danger"
                 onClick={() => removeUserFromRoom({ roomID: room.id, userID: me && me.id })}
+                onComplete={toggle}
                 style={{ float: 'right', marginLeft: '4px' }}
             >
                 Leave
-            </Button>
+            </AnimatedButton>
         </ListGroupItem>
-    ))
+    ));
+
     return (
         <div>
             <Modal open={open} toggle={toggle}>

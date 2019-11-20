@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, ModalBody, ModalHeader, FormInput, Button } from 'shards-react';
 import { addFriend } from '../../api/functions';
+import AnimatedButton from './AnimatedButton';
 
 export default function SendFriendRequest({ friend, open, toggle }) {
     const [message, setMessage] = useState('');
@@ -10,10 +11,9 @@ export default function SendFriendRequest({ friend, open, toggle }) {
         toggle();
     };
 
-    const send = () => {
-        addFriend({ friendID: friend.id, message });
+    const send = async () => {
         setMessage('');
-        toggle();
+        return addFriend({ friendID: friend.id, message });
     };
 
     const handleKeyPress = (e) => {
@@ -38,7 +38,13 @@ export default function SendFriendRequest({ friend, open, toggle }) {
                     <br />
                     <div style={{ float: 'right' }}>
                         <Button style={{ marginLeft: '4px' }} theme="danger" onClick={cancel}>Cancel</Button>
-                        <Button style={{ marginLeft: '4px' }} onClick={send}>Send</Button>
+                        <AnimatedButton
+                            style={{ marginLeft: '4px' }}
+                            onClick={send}
+                            onComplete={toggle}
+                        >
+                            Send
+                        </AnimatedButton>
                     </div>
                 </ModalBody>
             </Modal>

@@ -3,14 +3,15 @@ import React, { useState, useRef } from 'react';
 import { Modal, ModalBody, ModalHeader, Button, FormSelect, FormInput } from 'shards-react';
 import { Type } from '../../api/Room';
 import { createRoom } from '../../api/functions';
+import AnimatedButton from './AnimatedButton';
 
 export default function CreateRoom({ open, toggle }) {
     const type = useRef();
     const [name, setName] = useState('');
 
-    const create = () => {
-        toggle();
-        createRoom({ type: type.current.value, name, });
+    const create = async () => {
+        // toggle();
+        return createRoom({ type: type.current.value, name, });
     };
 
     const cancel = () => {
@@ -41,12 +42,13 @@ export default function CreateRoom({ open, toggle }) {
                         />
                     </label>
                     <br />
-                    <Button
+                    <AnimatedButton
                         style={{ float: 'right', marginLeft: '4px' }}
                         onClick={create}
+                        onComplete={toggle}
                     >
                         Create
-                    </Button>
+                    </AnimatedButton>
                     <Button
                         theme="danger"
                         style={{ float: 'right', marginLeft: '4px' }}
