@@ -11,19 +11,21 @@ const avatarStyle = {
     marginRight: '5px'
 };
 
-export default function Avatar({ url }) {
+export default function Avatar({ url, style }) {
     if (!url) return (<div />);
     return (
         <div>
-            <img src={url} alt="avatar" style={avatarStyle} />
+            <img src={url} alt="avatar" style={{...avatarStyle, ...style}} />
         </div>
     )
 }
 
 Avatar.propTypes = {
     url: PropTypes.string,
+    style: PropTypes.objectOf(PropTypes.object),
 };
 
 Avatar.defaultProps = {
     url: null,
+    style: {},
 }
