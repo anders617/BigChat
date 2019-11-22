@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'shards-react';
 
-function sleep(ms) {
+export function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -13,8 +13,17 @@ sheet.insertRule(`
 }`, sheet.cssRules.length);
 
 export function Loader({ height = '20px' }) {
+    const div = useRef();
+    const [width, setWidth] = useState(null);
+
+    useEffect(() => {
+        setWidth(div.current.offsetWidth);
+    }, [div.current]);
+
+    const margin = width && width < height ? (width - height) / 2 : 'auto';
+
     return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+        <div ref={div} style={{ display: 'flex', alignItems: 'center', height: '100%', width: '100%' }}>
             <div
                 style={{
                     border: 'medium solid #3498db',
@@ -22,8 +31,8 @@ export function Loader({ height = '20px' }) {
                     borderRadius: '50%',
                     height,
                     width: height,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
+                    marginLeft: margin,
+                    marginRight: margin,
                     animation: 'spin 1.2s linear infinite',
                 }}
             />
@@ -84,6 +93,6 @@ export default function AnimatedButton({
             {...rest}
         >
             {inner}
-        </Button >
+        </Button>
     );
 }

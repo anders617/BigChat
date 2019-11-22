@@ -36,20 +36,20 @@ export default function Friends({ me, room, open, toggle }) {
                             {requester.name}
                         </div>
                     )}
-                    <Button
+                    <AnimatedButton
                         title="Reject friend request"
                         style={{ float: 'right', marginLeft: '4px' }}
                         onClick={() => removeFriend({ friendID: requester.id })}
                     >
                         <FontAwesomeIcon icon={faUserTimes} />
-                    </Button>
-                    <Button
+                    </AnimatedButton>
+                    <AnimatedButton
                         title="Accept friend request"
                         style={{ float: 'right', marginLeft: '4px' }}
                         onClick={() => addFriend({ friendID: requester.id })}
                     >
                         <FontAwesomeIcon icon={faUserCheck} />
-                    </Button>
+                    </AnimatedButton>
                 </p>
                 {request.message}
             </ListGroupItem>
