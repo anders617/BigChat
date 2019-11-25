@@ -1,9 +1,10 @@
 // Import FirebaseAuth and firebase.
 import React from 'react';
-import {  
+import {
   Card,
   CardTitle,
   CardBody,
+  Fade,
 } from 'shards-react';
 import * as firebase from 'firebase';
 import { FirebaseAuth } from 'react-firebaseui';
@@ -11,6 +12,10 @@ import { FirebaseAuth } from 'react-firebaseui';
 import auth from '../../api/auth';
 import analytics from '../../api/analytics';
 import { LOGIN } from '../../api/analyticsevents';
+
+const WAITING_FOR_LOGIN = 0;
+const LOGGED_IN = 1;
+const LOGGED_OUT = 2;
 
 class AuthenticationContainer extends React.Component {
   // Configure FirebaseUI.
@@ -42,7 +47,7 @@ class AuthenticationContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isSignedIn: false, // Local signed-in state.
+      status: WAITING_FOR_LOGIN, // Local signed-in state.
     };
   }
 
@@ -50,7 +55,7 @@ class AuthenticationContainer extends React.Component {
   componentDidMount() {
     this.unregisterAuthObserver = auth.onAuthStateChanged(
       (user) => {
-        this.setState({ isSignedIn: !!user });
+        this.setState({ status: user ? LOGGED_IN : LOGGED_OUT });
         if (user) {
           analytics.logEvent(LOGIN, {});
         }
@@ -64,20 +69,42 @@ class AuthenticationContainer extends React.Component {
   }
 
   render() {
-    const { isSignedIn } = this.state;
+    const { status } = this.state;
     const { children } = this.props;
-    if (!isSignedIn) {
+    if (status === WAITING_FOR_LOGIN) {
       return (
-        <Card>
-          <CardBody>
-            <CardTitle style={{ textAlign: 'center', fontSize: '32pt', marginBottom: '20px' }}>BigChat</CardTitle>
-            <p style={{ textAlign: 'center' }}>Please Sign In</p>
-            <FirebaseAuth uiConfig={this.uiConfig} firebaseAuth={auth} />
-          </CardBody>
-        </Card>
+        <Fade className="Loading">
+          <h1 style={{textAlign: 'center'}}>
+            BigChat
+          </h1>
+          <h2 style={{textAlign: 'center'}}>
+            Loading...
+          </h2>
+        </Fade>
       );
     }
-    return children;
+    if (status === LOGGED_OUT) {
+      return (
+        <div className="Login">
+          <Fade>
+            <Card>
+              <CardBody>
+                <CardTitle style={{ textAlign: 'center', fontSize: '32pt', marginBottom: '20px' }}>BigChat</CardTitle>
+                <p style={{ textAlign: 'center' }}>Please Sign In</p>
+                <FirebaseAuth uiConfig={this.uiConfig} firebaseAuth={auth} />
+              </CardBody>
+            </Card>
+          </Fade>
+        </div>
+      );
+    }
+    return (
+      <div className="BigChat">
+        <Fade>
+          {children}
+        </Fade>
+      </div>
+    );
   }
 }
 
