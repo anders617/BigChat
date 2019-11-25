@@ -52,10 +52,10 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
                         <FontAwesomeIcon icon={faPlus} />
                     </Button>
                 </ModalHeader>
-                <ModalBody>
+                <ModalBody style={{overflow: 'scroll', maxHeight: 'calc(100vh - 130px)'}}>
                     <ListGroup>
                         {roomComponents}
-                    </ListGroup>
+                    </ListGroup>    
                 </ModalBody>
             </Modal>
             <CreateRoom open={createOpen} toggle={() => setCreateOpen(!createOpen)} />
