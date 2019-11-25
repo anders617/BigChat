@@ -99,8 +99,8 @@ class AuthenticationContainer extends React.Component {
       );
     }
     return (
-      <div className="BigChat">
-        <Fade>
+      <div className="BigChat" style={{height: '100%'}}>
+        <Fade style={{height: '100%'}}>
           {children}
         </Fade>
       </div>

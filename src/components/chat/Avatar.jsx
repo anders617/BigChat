@@ -22,7 +22,7 @@ export default function Avatar({ url, style }) {
 
 Avatar.propTypes = {
     url: PropTypes.string,
-    style: PropTypes.objectOf(PropTypes.object),
+    style: PropTypes.objectOf(PropTypes.string||PropTypes.number),
 };
 
 Avatar.defaultProps = {
