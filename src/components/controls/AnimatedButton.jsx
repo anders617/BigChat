@@ -63,8 +63,9 @@ export default function AnimatedButton({
         try {
             const result = await onClick();
             setState('complete');
-            onComplete();
+            onComplete(result);
         } catch (e) {
+            console.log(e);
             setState('failure');
         }
     };

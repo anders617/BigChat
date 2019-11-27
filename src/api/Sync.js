@@ -8,7 +8,7 @@ import {
     updateContent
 } from "./functions";
 
-async function now() {
+export async function now() {
     if (now.offset === -1) {
         const clientTimestamp = Date.now();
         const resp = await fetch('https://worldtimeapi.org/api/timezone/Etc/UTC', {
@@ -42,8 +42,7 @@ export default class Sync {
             lastUpdated: await now(),
             state: State.PLAYING,
             time: await Call('controls.tell'),
-            sequence: sequence + 1,
-            leader: this.me.id,
+            sequence: sequence + 1
         });
         if (this.sequence === sequence) {
             this.sequence += 1;
@@ -62,8 +61,7 @@ export default class Sync {
             lastUpdated: await now(),
             state: State.PAUSED,
             time: await Call('controls.tell'),
-            sequence: sequence + 1,
-            leader: this.me.id,
+            sequence: sequence + 1
         });
         if (this.sequence === sequence) {
             this.sequence += 1;
@@ -87,8 +85,7 @@ export default class Sync {
             lastUpdated: await now(),
             state,
             time,
-            sequence: sequence + 1,
-            leader: this.me.id,
+            sequence: sequence + 1
         });
         if (this.sequence === sequence) {
             this.sequence += 1;
@@ -96,12 +93,12 @@ export default class Sync {
     }
 
     async synchronize(room, me, content) {
-        if (!room || !me || !content) return;
+        this.room = room;
         this.content = content;
+        this.me = me;
+        if (!room || !me || !content) return;
         if (content.sequence <= this.sequence) return;
         this.sequence = content.sequence;
-        this.room = room;
-        this.me = me;
         register('sync', this);
         if (content.state === State.PAUSED && !await Call('controls.paused')) {
             console.log('Received pause command');

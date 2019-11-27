@@ -14,6 +14,7 @@ export default class Content {
         lastUpdated,
         leader,
         sequence,
+        name,
     }) {
         this._id = id;
         this._state = state;
@@ -23,6 +24,7 @@ export default class Content {
         this._lastUpdated = lastUpdated;
         this._leader = leader;
         this._sequence = sequence;
+        this._name = name;
     }
 
     get id() {
@@ -55,6 +57,10 @@ export default class Content {
 
     get sequence() {
         return this._sequence;
+    }
+
+    get name() {
+        return this._name;
     }
 
 }

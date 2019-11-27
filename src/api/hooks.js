@@ -54,7 +54,10 @@ export function useRoomUserIDs(roomID) {
     const [userIDs, setUserIDs] = useState([]);
 
     useEffect(() => {
-        if (roomID === null) return () => {};
+        if (roomID === null) {
+            setUserIDs([]);
+            return () => {};
+        }
         return subscribeUserIDs(setUserIDs, roomID);
     }, [roomID]);
 
@@ -65,7 +68,10 @@ export function useRoomIDs(userID) {
     const [roomIDs, setRoomIDs] = useState([]);
 
     useEffect(() => {
-        if (!userID) return () => {};
+        if (!userID) {
+            setRoomIDs([]);
+            return () => {};
+        }
         return subscribeRoomIDs(setRoomIDs, userID);
     }, [userID]);
 
@@ -76,7 +82,10 @@ export function useMessages(roomID, messageLimit = undefined) {
     const [messages, setMessages] = useState([]);
 
     useEffect(() => {
-        if (!roomID) return () => {};
+        if (!roomID) {
+            setMessages([]);
+            return () => {};
+        }
         return subscribeMessages(setMessages, roomID, messageLimit);
     }, [roomID]);
 
@@ -97,7 +106,10 @@ export function useContent(roomID, contentID) {
     const [content, setContent] = useState(null);
 
     useEffect(() => {
-        if (!roomID || !contentID) return () => {};
+        if (!roomID || !contentID) {
+            setContent(null);
+            return () => {};
+        }
         return subscribeContent(setContent, roomID, contentID);
     }, [roomID, contentID]);
 
@@ -108,7 +120,10 @@ export function useContents(roomID) {
     const [contents, setContents] = useState([]);
 
     useEffect(() => {
-        if (!roomID) return () => {};
+        if (!roomID) {
+            setContents([]);
+            return () => {};
+        }
         return subscribeContents(setContents, roomID);
     }, [roomID]);
 
@@ -119,7 +134,10 @@ export function useFriendIDs(userID) {
     const [friendIDs, setFriendIDs] = useState([]);
 
     useEffect(() => {
-        if (!userID) return () => {};
+        if (!userID) {
+            setFriendIDs([]);
+            return () => {};
+        }
         return subscribeFriendIDs(setFriendIDs, userID);
     }, [userID]);
 
@@ -169,7 +187,10 @@ export function useFriendRequests(userID) {
     const [friendRequests, setFriendRequests] = useState([]);
 
     useEffect(() => {
-        if (userID === null) return () => {};
+        if (userID === null) {
+            setFriendRequests([]);
+            return () => {};
+        }
         return subscribeFriendRequests(setFriendRequests, userID);
     }, [userID]);
 

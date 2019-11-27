@@ -6,7 +6,7 @@ import Content from './Content';
 import Friends from './Friends';
 
 
-export default function Controls({ me, room, content, setRoom }) {
+export default function Controls({ me, room, content, setRoom, setContent }) {
 	const [roomsOpen, setRoomsOpen] = useState(false);
 	const [contentOpen, setContentOpen] = useState(false);
 	const [friendsOpen, setFriendsOpen] = useState(false);
@@ -33,7 +33,7 @@ export default function Controls({ me, room, content, setRoom }) {
 				</Row>
 			</Container>
 			<Rooms me={me} currentRoom={room} setRoom={setRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
-			<Content room={room} me={me} content={content} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
+			<Content room={room} me={me} content={content} setContent={setContent} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
 			<Friends me={me} room={room} open={friendsOpen} toggle={() => { setFriendsOpen(!friendsOpen) }} />
 		</div >
 	);

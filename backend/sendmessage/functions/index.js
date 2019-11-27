@@ -390,7 +390,6 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
     time,
     lastUpdated,
     sequence,
-    leader,
   } = data;
   checkString({
     str: roomID,
@@ -419,9 +418,7 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
         ...sequence && {
           sequence
         },
-        ...leader && {
-          leader
-        },
+        leader: context.auth.uid,
         lastUpdated: admin.firestore.Timestamp.fromMillis(lastUpdated),
       });
     });
@@ -429,4 +426,101 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
     console.log(e);
     throw new functions.https.HttpsError('aborted', 'Transaction failed');
   }
+});
+
+exports.createContent = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    roomID,
+    state,
+    time,
+    duration,
+    url,
+    lastUpdated,
+    name,
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Room ID cannot be empty',
+  });
+  if (!['PLAYING', 'PAUSED'].includes(state)) throw new functions.https.HttpsError('invalid-argument', 'Invalid state');
+  checkString({
+    str: url,
+    msg: 'URL cannot be empty',
+  });
+  if (!duration) throw new functions.https.HttpsError('invalid-argument', 'Invalid duration');
+  checkString({
+    str: name,
+    msg: 'Name cannot be empty',
+  });
+  const roomRef = app.firestore().collection('rooms').doc(roomID);
+  const roomUserRef = roomRef.collection('users').doc(context.auth.uid);
+  const contentRef = roomRef.collection('content').doc();
+  let detailedURL = url;
+  if (!detailedURL.includes('#'))
+    detailedURL += '#';
+  else
+    detailedURL += '&';
+  detailedURL += `BC.room=${roomRef.id}&BC.content=${contentRef.id}`
+  try {
+    await app.firestore().runTransaction(async transaction => {
+      const room = await transaction.get(roomRef);
+      if (!room.exists) throw new Error(`Room ${roomID} does not exist`);
+      const roomUser = await transaction.get(roomUserRef);
+      if (!roomUser.exists) throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
+      return transaction.set(contentRef, {
+        state,
+        time: time || 0,
+        duration,
+        url: detailedURL,
+        lastUpdated: admin.firestore.Timestamp.fromMillis(lastUpdated),
+        name,
+        leader: context.auth.uid,
+        sequence: 1,
+      });
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', e.message);
+  }
+  return {
+    'success': true,
+    'contentID': contentRef.id,
+  };
+});
+
+exports.deleteContent = functions.https.onCall(async (data, context) => {
+  checkAuth({
+    context,
+  });
+  const {
+    roomID,
+    contentID,
+  } = data;
+  checkString({
+    str: roomID,
+    msg: 'Room ID cannot be empty',
+  });
+  checkString({
+    str: contentID,
+    msg: 'Content ID cannot be empty',
+  });
+  const roomRef = app.firestore().collection('rooms').doc(roomID);
+  const roomUserRef = roomRef.collection('users').doc(context.auth.uid);
+  const contentRef = roomRef.collection('content').doc(contentID);
+  try {
+    await app.firestore().runTransaction(async transaction => {
+      const roomUser = await transaction.get(roomUserRef);
+      if (!roomUser.exists) throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
+      return transaction.delete(contentRef);
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', e.message);
+  }
+  return {
+    'success': true,
+  };
 });

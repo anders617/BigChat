@@ -19,3 +19,7 @@ export const removeFriend = firebase.functions().httpsCallable('removeFriend');
 export const addUserToRoom = firebase.functions().httpsCallable('addUserToRoom');
 // Input {roomID: `string`, userID: `string`}
 export const removeUserFromRoom = firebase.functions().httpsCallable('removeUserFromRoom');
+// Input {roomID: `string`, state: `string`, time: `number`, duration: `number`, url: `string`, lastUpdated: `date`, name: `string`}
+export const createContent = firebase.functions().httpsCallable('createContent');
+// Input {roomID: `string`, contentID: `string`}
+export const deleteContent = firebase.functions().httpsCallable('deleteContent');

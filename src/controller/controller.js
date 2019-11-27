@@ -82,6 +82,10 @@ class HTMLMediaControls {
 		return media.duration;
 	}
 
+	valid() {
+		return this.select('video', 'audio') !== null;
+	}
+
 	// eslint-disable-next-line class-methods-use-this
 	goto(url) {
 		window.location.href = url;
@@ -91,11 +95,15 @@ class HTMLMediaControls {
 		return window.location.href;
 	}
 
+	title() {
+		return this.select('.title').innerText;
+	}
+
 }
 
 class NetflixControls extends HTMLMediaControls {
 	constructor() {
-		super()
+		super();
 	}
 
 	seek(seconds) {
@@ -117,6 +125,10 @@ class NetflixControls extends HTMLMediaControls {
 		scrubber.dispatchEvent(new MouseEvent("mousedown", options));
 		scrubber.dispatchEvent(new MouseEvent("mouseup", options));
 		return true;
+	}
+
+	title() {
+		return this.select('.video-title').textContent;
 	}
 
 }
