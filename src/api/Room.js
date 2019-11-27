@@ -20,6 +20,7 @@ export const Type = {
 	PUBLIC: 'PUBLIC',
 	PRIVATE: 'PRIVATE',
 	DIRECT: 'DIRECT',
+	SITE: 'SITE',
 };
 
 export default class Room {

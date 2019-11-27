@@ -269,13 +269,21 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
     str: name,
     msg: 'Room name cannot be empty',
   });
-  if (!['PUBLIC', 'PRIVATE', 'DIRECT'].includes(type))
+  if (!['PUBLIC', 'PRIVATE', 'DIRECT', 'SITE'].includes(type))
     throw new functions.https.HttpsError('invalid-argument', `${type} is not a valid room type`);
-  // Remove fragment and replace / with \ for firebase
-  const cleanedURL = url.match(/https?:\/\/(.*\.[^#]*)(#.*)?/)[1].replace(/\//g, '\\');
-  const roomRef = type === 'PUBLIC' && cleanedURL ?
-    app.firestore().collection('rooms').doc(cleanedURL) :
-    app.firestore().collection('rooms').doc();
+  let roomRef;
+  if (type === 'SITE') {
+    checkString({
+      str: url,
+      msg: 'URL must be provided for a room of type SITE',
+    });
+    // Remove fragment and replace / with \ for firebase
+    const cleanedURL = url.match(/https?:\/\/(.*\.[^#]*)(#.*)?/)[1].replace(/\//g, '\\');
+    if (!cleanedURL) throw new functions.https.HttpsError('invalid-argument', `${url} is not a valid url`);
+    roomRef = app.firestore().collection('rooms').doc(cleanedURL);
+  } else {
+    roomRef = app.firestore().collection('rooms').doc();
+  }
   const usersRef = roomRef.collection('users').doc(context.auth.token.uid);
   const roomsRef = app.firestore().collection('users').doc(context.auth.token.uid).collection('rooms').doc(roomRef.id);
   try {
@@ -286,7 +294,7 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
         type,
         name,
       });
-      if (type !== 'PUBLIC') {
+      if (type !== 'SITE') {
         transaction.set(roomsRef, {});
         transaction.set(usersRef, {});
       }

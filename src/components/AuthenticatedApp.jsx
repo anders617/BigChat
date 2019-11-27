@@ -43,7 +43,7 @@ export default function AuthenticatedApp() {
             else {
                 const response = await createRoom({
                     name: await Call('controls.documentTitle'),
-                    type: Type.PUBLIC,
+                    type: Type.SITE,
                     url,
                 });
                 setRoomID(response.data.roomID);

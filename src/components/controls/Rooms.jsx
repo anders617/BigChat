@@ -31,7 +31,10 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
             <AnimatedButton
                 theme="danger"
                 onClick={() => removeUserFromRoom({ roomID: room.id, userID: me && me.id })}
-                onComplete={toggle}
+                onComplete={() => {
+                    setRoom(null);
+                    toggle();
+                }}
                 style={{ float: 'right', marginLeft: '4px' }}
             >
                 Leave
@@ -52,10 +55,10 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
                         <FontAwesomeIcon icon={faPlus} />
                     </Button>
                 </ModalHeader>
-                <ModalBody style={{overflow: 'scroll', maxHeight: 'calc(100vh - 130px)'}}>
+                <ModalBody style={{ overflow: 'scroll', maxHeight: 'calc(100vh - 130px)' }}>
                     <ListGroup>
                         {roomComponents}
-                    </ListGroup>    
+                    </ListGroup>
                 </ModalBody>
             </Modal>
             <CreateRoom open={createOpen} toggle={() => setCreateOpen(!createOpen)} />
