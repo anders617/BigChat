@@ -10,7 +10,7 @@ export const sendMessage = firebase.functions().httpsCallable('sendMessage');
 export const addFriend = firebase.functions().httpsCallable('addFriend');
 // Input: {}
 export const createMe = firebase.functions().httpsCallable('createMe');
-// Input: {type: `string`, name: `string`}
+// Input: {type: `string`, name: `string`, url: `string` (optional)}
 export const createRoom = firebase.functions().httpsCallable('createRoom');
 export const updateContent = firebase.functions().httpsCallable('updateContent');
 // Input {friendID: `string`}

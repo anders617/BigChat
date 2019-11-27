@@ -3,6 +3,14 @@ import Controls from './controls/Controls';
 import ChatContainer from './chat/ChatContainer';
 import Call, { register } from '../rpc/rpc';
 import { useRoom, useMe, useContent } from '../api/hooks';
+import { createRoom } from '../api/functions';
+import { Type } from '../api/Room';
+
+function cleanURL(url) {
+    let cleanedURL = url.includes('#') ? url.substr(0, url.lastIndexOf('#')) : url;
+    cleanedURL = cleanedURL.replace(/\//g, '\\');
+    return cleanedURL;
+}
 
 function extractFragmentInfo(url) {
     const fragment = url.split('#')[1];
@@ -29,7 +37,17 @@ export default function AuthenticatedApp() {
         (async () => {
             const url = await Call('controls.url');
             const kv = extractFragmentInfo(url);
-            if (kv.room) setRoomID(kv.room);
+            if (kv.room) {
+                setRoomID(kv.room);
+            }
+            else {
+                const response = await createRoom({
+                    name: await Call('controls.documentTitle'),
+                    type: Type.PUBLIC,
+                    url,
+                });
+                setRoomID(response.data.roomID);
+            }
             if (kv.content) setContentID(kv.content);
         })();
     }, []);

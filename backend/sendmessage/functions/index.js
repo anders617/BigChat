@@ -263,6 +263,7 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
   const {
     type,
     name,
+    url,
   } = data;
   checkString({
     str: name,
@@ -270,26 +271,31 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
   });
   if (!['PUBLIC', 'PRIVATE', 'DIRECT'].includes(type))
     throw new functions.https.HttpsError('invalid-argument', `${type} is not a valid room type`);
-  const roomRef = app.firestore()
-    .collection('rooms')
-    .doc();
-  const usersRef = roomRef
-    .collection('users')
-    .doc(context.auth.token.uid);
-  const roomsRef = app.firestore()
-    .collection('users')
-    .doc(context.auth.token.uid)
-    .collection('rooms')
-    .doc(roomRef.id);
-  await app.firestore()
-    .batch()
-    .set(roomRef, {
-      type,
-      name,
-    })
-    .set(roomsRef, {})
-    .set(usersRef, {})
-    .commit();
+  // Remove fragment and replace / with \ for firebase
+  const cleanedURL = url.match(/https?:\/\/(.*\.[^#]*)(#.*)?/)[1].replace(/\//g, '\\');
+  const roomRef = type === 'PUBLIC' && cleanedURL ?
+    app.firestore().collection('rooms').doc(cleanedURL) :
+    app.firestore().collection('rooms').doc();
+  const usersRef = roomRef.collection('users').doc(context.auth.token.uid);
+  const roomsRef = app.firestore().collection('users').doc(context.auth.token.uid).collection('rooms').doc(roomRef.id);
+  try {
+    await app.firestore().runTransaction(async transaction => {
+      const room = await transaction.get(roomRef);
+      if (room.exists) return transaction;
+      transaction.set(roomRef, {
+        type,
+        name,
+      });
+      if (type !== 'PUBLIC') {
+        transaction.set(roomsRef, {});
+        transaction.set(usersRef, {});
+      }
+      return transaction;
+    });
+  } catch (e) {
+    console.log(e);
+    throw new functions.https.HttpsError('aborted', e.message);
+  }
   return {
     success: true,
     roomID: roomRef.id,

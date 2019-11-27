@@ -99,6 +99,10 @@ class HTMLMediaControls {
 		return this.select('.title').innerText;
 	}
 
+	documentTitle() {
+		return document.title;
+	}
+
 }
 
 class NetflixControls extends HTMLMediaControls {
