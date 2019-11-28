@@ -74,7 +74,7 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
                     </Button>
                 </ModalHeader>
                 <ModalBody style={{ height: 'calc(100vh - 130px)' }}>
-                    <ListGroup style={{ maxHeight: '50%' }}>
+                    <ListGroup style={{ height: '50%' }}>
                         <ContentEditable
                             innerRef={publicFilterRef}
                             html={publicFilter}
@@ -89,7 +89,7 @@ export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
                         </div>
                     </ListGroup>
                     <br />
-                    <ListGroup style={{ maxHeight: '50%' }}>
+                    <ListGroup style={{ height: '50%' }}>
                         <ContentEditable
                             innerRef={privateFilterRef}
                             html={privateFilter}
