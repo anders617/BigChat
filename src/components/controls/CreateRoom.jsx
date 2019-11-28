@@ -18,6 +18,11 @@ export default function CreateRoom({ open, toggle }) {
         toggle();
     };
 
+    const onComplete = () => {
+        setName('');
+        toggle();
+    }
+
     return (
         <>
             <Modal open={open} toggle={toggle}>
@@ -44,7 +49,7 @@ export default function CreateRoom({ open, toggle }) {
                     <AnimatedButton
                         style={{ float: 'right', marginLeft: '4px' }}
                         onClick={create}
-                        onComplete={toggle}
+                        onComplete={onComplete}
                     >
                         Create
                     </AnimatedButton>
