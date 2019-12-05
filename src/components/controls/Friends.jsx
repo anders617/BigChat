@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button } from 'shards-react';
+import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button, FormInput, InputGroup, InputGroupAddon, InputGroupText } from 'shards-react';
 import Avatar from '../chat/Avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserPlus, faUserCheck, faUserTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+// import {  } from '@fortawesome/free-regular-svg-icons';
+import { faUserPlus, faUserCheck, faUserTimes, faEnvelope, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { useFriendIDs, useUsers, useFriendRequests, useRoomUserIDs } from '../../api/hooks';
 import AddFriends from './AddFriends';
 import { addFriend, removeFriend, addUserToRoom } from '../../api/functions';
@@ -15,6 +16,7 @@ sheet.insertRule('.friends-modal-header .modal-title { width: 100%; }', sheet.cs
 export default function Friends({ me, room, open, toggle }) {
     const friendIDs = useFriendIDs(me && me.id);
     const friends = useUsers(friendIDs);
+    const [friendsFilter, setFriendsFilter] = useState('');
     const friendRequests = useFriendRequests(me && me.id);
     const [requesterIDs, setRequesterIDs] = useState([]);
     const requesters = useUsers(requesterIDs);
@@ -56,27 +58,29 @@ export default function Friends({ me, room, open, toggle }) {
         )
     });
 
-    const friendComponents = friends.filter(friend => friend).map(friend => (
-        <ListGroupItem key={friend.id}>
-            <Avatar url={friend.photoURL} />
-            {friend.name}
-            <AnimatedButton
-                title="Remove friend"
-                style={{ float: 'right', marginLeft: '4px' }}
-                onClick={() => removeFriend({ friendID: friend.id })}
-            >
-                <FontAwesomeIcon icon={faUserTimes} />
-            </AnimatedButton>
-            <AnimatedButton
-                disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
-                title="Invite to current room"
-                style={{ float: 'right', marginLeft: '4px' }}
-                onClick={() => addUserToRoom({ roomID: room.id, userID: friend.id })}
-            >
-                <FontAwesomeIcon icon={faEnvelope} />
-            </AnimatedButton>
-        </ListGroupItem>
-    ));
+    const friendComponents = friends
+        .filter(friend => friend && friend.name.toLowerCase().includes(friendsFilter.toLowerCase()))
+        .map(friend => (
+            <ListGroupItem key={friend.id}>
+                <Avatar url={friend.photoURL} />
+                {friend.name}
+                <AnimatedButton
+                    title="Remove friend"
+                    style={{ float: 'right', marginLeft: '4px' }}
+                    onClick={() => removeFriend({ friendID: friend.id })}
+                >
+                    <FontAwesomeIcon icon={faUserTimes} />
+                </AnimatedButton>
+                <AnimatedButton
+                    disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
+                    title="Invite to current room"
+                    style={{ float: 'right', marginLeft: '4px' }}
+                    onClick={() => addUserToRoom({ roomID: room.id, userID: friend.id })}
+                >
+                    <FontAwesomeIcon icon={faEnvelope} />
+                </AnimatedButton>
+            </ListGroupItem>
+        ));
 
     return (
         <div>
@@ -91,7 +95,7 @@ export default function Friends({ me, room, open, toggle }) {
                         <FontAwesomeIcon icon={faUserPlus} />
                     </Button>
                 </ModalHeader>
-                <ModalBody>
+                <ModalBody style={{ maxHeight: 'calc(100vh - 130px)', overflow: 'scroll' }}>
                     {friendRequestComponents.length > 0 && (
                         <div>
                             <h4>Friend Requests</h4>
@@ -102,6 +106,12 @@ export default function Friends({ me, room, open, toggle }) {
                             <h4>Friends</h4>
                         </div>
                     )}
+                    <InputGroup seamless className="mb-2" style={{ marginTop: '6px', marginBottom: '6px' }}>
+                        <InputGroupAddon type="prepend">
+                            <InputGroupText><FontAwesomeIcon icon={faSearch} /></InputGroupText>
+                        </InputGroupAddon>
+                        <FormInput type="search" onChange={e => setFriendsFilter(e.target.value)} />
+                    </InputGroup>
                     <ListGroup>
                         {friendComponents}
                     </ListGroup>
