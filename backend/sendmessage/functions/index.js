@@ -336,7 +336,7 @@ exports.addUserToRoom = functions.https.onCall(async (data, context) => {
       if (!room.exists) throw new Error(`Room does not exist ${room.id}`);
       if (!user.exists) throw new Error(`User does not exist ${user.id}`);
       if (!currentUser.exists) throw new Error(`Current user does not exist ${currentUser.id}`);
-      if (room.data().type === 'DIRECT') throw new Error('Cannot add user to direct message');
+      if (!['PUBLIC', 'PRIVATE'].includes(room.data().type)) throw new Error(`Cannot add user to room of type: ${room.data().type}`);
       if (room.data().type === 'PRIVATE' && !roomCurrentUser.exists) throw new Error('Not authorized to add user to private room');
       const roomNewUserRef = roomRef.collection('users').doc(user.id);
       const userNewRoomRef = userRef.collection('rooms').doc(room.id)

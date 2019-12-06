@@ -58,7 +58,7 @@ export default function Friends({ me, room, open, toggle }) {
         )
     });
 
-    const friendComponents = friends
+    const friendComponents = room ? friends
         .filter(friend => friend && friend.name.toLowerCase().includes(friendsFilter.toLowerCase()))
         .map(friend => (
             <ListGroupItem key={friend.id}>
@@ -71,16 +71,18 @@ export default function Friends({ me, room, open, toggle }) {
                 >
                     <FontAwesomeIcon icon={faUserTimes} />
                 </AnimatedButton>
-                <AnimatedButton
-                    disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
-                    title="Invite to current room"
-                    style={{ float: 'right', marginLeft: '4px' }}
-                    onClick={() => addUserToRoom({ roomID: room.id, userID: friend.id })}
-                >
-                    <FontAwesomeIcon icon={faEnvelope} />
-                </AnimatedButton>
+                {[Type.PRIVATE, Type.PUBLIC].includes(room.type) && (
+                    <AnimatedButton
+                        disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
+                        title="Invite to current room"
+                        style={{ float: 'right', marginLeft: '4px' }}
+                        onClick={() => addUserToRoom({ roomID: room.id, userID: friend.id })}
+                    >
+                        <FontAwesomeIcon icon={faEnvelope} />
+                    </AnimatedButton>
+                )}
             </ListGroupItem>
-        ));
+        )) : [];
 
     return (
         <div>
