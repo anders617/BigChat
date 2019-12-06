@@ -27,12 +27,22 @@ export default function Friends({ me, room, rooms, setRoom, open, toggle }) {
     }, [friendRequests]);
 
     const joinDirectMessage = async friend => {
-        const response = await createRoom({
-            type: Type.DIRECT,
-            name: [me.name, friend.name].sort().join(' and '),
-            friendID: friend.id,
-        });
-        setRoom(response.data.roomID);
+        let foundRoom = false;
+        rooms
+            .filter(availRoom => availRoom && availRoom.type === Type.DIRECT)
+            .filter(availRoom => availRoom.id === [me.id, friend.id].sort().join('-'))
+            .forEach(availRoom => {
+                setRoom(availRoom.id);
+                foundRoom = true;
+            });
+        if (!foundRoom) {
+            const response = await createRoom({
+                type: Type.DIRECT,
+                name: [me.name, friend.name].sort().join(' and '),
+                friendID: friend.id,
+            });
+            setRoom(response.data.roomID);
+        }
         toggle();
     };
 
