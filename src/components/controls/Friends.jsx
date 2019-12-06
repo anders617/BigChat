@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button, FormInput, InputGroup, InputGroupAddon, InputGroupText } from 'shards-react';
 import Avatar from '../chat/Avatar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import {  } from '@fortawesome/free-regular-svg-icons';
-import { faUserPlus, faUserCheck, faUserTimes, faEnvelope, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faUserPlus, faUserCheck, faUserTimes, faEnvelope, faSearch, faComment } from '@fortawesome/free-solid-svg-icons';
 import { useFriendIDs, useUsers, useFriendRequests, useRoomUserIDs } from '../../api/hooks';
 import AddFriends from './AddFriends';
-import { addFriend, removeFriend, addUserToRoom } from '../../api/functions';
+import { addFriend, removeFriend, addUserToRoom, createRoom } from '../../api/functions';
 import { Type } from '../../api/Room';
 import AnimatedButton from './AnimatedButton';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.friends-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
 
-export default function Friends({ me, room, open, toggle }) {
+export default function Friends({ me, room, rooms, setRoom, open, toggle }) {
     const friendIDs = useFriendIDs(me && me.id);
     const friends = useUsers(friendIDs);
     const [friendsFilter, setFriendsFilter] = useState('');
@@ -26,6 +25,16 @@ export default function Friends({ me, room, open, toggle }) {
     useEffect(() => {
         setRequesterIDs(friendRequests.map(request => request.id));
     }, [friendRequests]);
+
+    const joinDirectMessage = async friend => {
+        const response = await createRoom({
+            type: Type.DIRECT,
+            name: [me.name, friend.name].sort().join(' and '),
+            friendID: friend.id,
+        });
+        setRoom(response.data.roomID);
+        toggle();
+    };
 
     const friendRequestComponents = friendRequests.map((request, i) => {
         const requester = requesters[i];
@@ -58,7 +67,7 @@ export default function Friends({ me, room, open, toggle }) {
         )
     });
 
-    const friendComponents = room ? friends
+    const friendComponents = friends
         .filter(friend => friend && friend.name.toLowerCase().includes(friendsFilter.toLowerCase()))
         .map(friend => (
             <ListGroupItem key={friend.id}>
@@ -71,7 +80,15 @@ export default function Friends({ me, room, open, toggle }) {
                 >
                     <FontAwesomeIcon icon={faUserTimes} />
                 </AnimatedButton>
-                {[Type.PRIVATE, Type.PUBLIC].includes(room.type) && (
+                <AnimatedButton
+                    disabled={room && room.type === Type.DIRECT && roomUserIDs.includes(friend.id)}
+                    title="Direct Message"
+                    style={{ float: 'right', marginLeft: '4px' }}
+                    onClick={() => joinDirectMessage(friend)}
+                >
+                    <FontAwesomeIcon icon={faComment} />
+                </AnimatedButton>
+                {room && [Type.PRIVATE, Type.PUBLIC].includes(room.type) && (
                     <AnimatedButton
                         disabled={!room || room.type === Type.DIRECT || roomUserIDs.includes(friend.id)}
                         title="Invite to current room"
@@ -82,7 +99,7 @@ export default function Friends({ me, room, open, toggle }) {
                     </AnimatedButton>
                 )}
             </ListGroupItem>
-        )) : [];
+        ));
 
     return (
         <div>

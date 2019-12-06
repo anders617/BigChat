@@ -1,16 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Controls from './controls/Controls';
 import ChatContainer from './chat/ChatContainer';
-import Call, { register } from '../rpc/rpc';
-import { useRoom, useMe, useContent } from '../api/hooks';
+import Call from '../rpc/rpc';
+import { useRoom, useMe, useContent, useRoomIDs, useRooms } from '../api/hooks';
 import { createRoom } from '../api/functions';
 import { Type } from '../api/Room';
-
-function cleanURL(url) {
-    let cleanedURL = url.includes('#') ? url.substr(0, url.lastIndexOf('#')) : url;
-    cleanedURL = cleanedURL.replace(/\//g, '\\');
-    return cleanedURL;
-}
 
 function extractFragmentInfo(url) {
     const fragment = url.split('#')[1];
@@ -32,6 +26,8 @@ export default function AuthenticatedApp() {
     const me = useMe();
     const [contentID, setContentID] = useState(null);
     const content = useContent(roomID, contentID);
+    const roomIDs = useRoomIDs(me && me.id);
+    const rooms = useRooms(roomIDs);
 
     useEffect(() => {
         (async () => {
@@ -54,7 +50,7 @@ export default function AuthenticatedApp() {
 
     return (
         <div style={{ height: '100%', width: '100%' }}>
-            <Controls me={me} room={room} content={content} setRoom={setRoomID} setContent={setContentID} />
+            <Controls me={me} room={room} content={content} setRoom={setRoomID} setContent={setContentID} rooms={rooms} />
             <ChatContainer me={me} room={room} roomID={roomID} />
         </div>
     );

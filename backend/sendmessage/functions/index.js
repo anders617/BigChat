@@ -264,6 +264,7 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
     type,
     name,
     url,
+    friendID,
   } = data;
   checkString({
     str: name,
@@ -281,15 +282,27 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
     const cleanedURL = url.match(/https?:\/\/(.*\.[^#]*)(#.*)?/)[1].replace(/\//g, '\\');
     if (!cleanedURL) throw new functions.https.HttpsError('invalid-argument', `${url} is not a valid url`);
     roomRef = app.firestore().collection('rooms').doc(cleanedURL);
+  } else if (type === 'DIRECT') {
+    if (!friendID) throw new functions.https.HttpsError('invalid-argument', `${friendID} is not a valid friend id`);
+    roomRef = app.firestore().collection('rooms').doc([context.auth.token.uid, friendID].sort().join('-'));
   } else {
     roomRef = app.firestore().collection('rooms').doc();
   }
   const usersRef = roomRef.collection('users').doc(context.auth.token.uid);
   const roomsRef = app.firestore().collection('users').doc(context.auth.token.uid).collection('rooms').doc(roomRef.id);
+  const friendRef = app.firestore().collection('users').doc(friendID);
+  const friendRoomsRef = friendRef.collection('rooms').doc(roomRef.id);
+  const roomFriendRef = roomRef.collection('users').doc(friendID);
   try {
     await app.firestore().runTransaction(async transaction => {
       const room = await transaction.get(roomRef);
       if (room.exists) return transaction;
+      if (type === 'DIRECT') {
+        const friend = await transaction.get(friendRef);
+        if (!friend.exists) throw new Error(`Friend ${friendID} does not exist`);
+        transaction.set(friendRoomsRef, {});
+        transaction.set(roomFriendRef, {});
+      }
       transaction.set(roomRef, {
         type,
         name,

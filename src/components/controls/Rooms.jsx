@@ -42,9 +42,7 @@ function RoomComponent({ room, me, currentRoom, setRoom, toggle }) {
     );
 }
 
-export default function Rooms({ me, currentRoom, setRoom, open, toggle }) {
-    const roomIDs = useRoomIDs(me && me.id);
-    const rooms = useRooms(roomIDs);
+export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle }) {
     const [createOpen, setCreateOpen] = useState(false);
     const publicFilterRef = useRef();
     const [publicFilter, setPublicFilter] = useState('Public Rooms');
