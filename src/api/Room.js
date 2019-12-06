@@ -132,3 +132,25 @@ export async function createRoom({
 	if (!response.data.success) return null;
 	return response.data.roomID;
 }
+
+export function subscribeRoomNamePrefix(consumer, prefix) {
+	const rooms = [];
+	if (prefix.length === 0)
+		return db.collection('rooms')
+			.where('type', '==', 'PUBLIC')
+			.limit(50)
+			.onSnapshot(snapshot => {
+				updateArrayWithChanges(rooms, snapshot.docChanges());
+				consumer(rooms.map(data => new Room(data)));
+			});
+	const end = prefix.substr(0, prefix.length - 1) + String.fromCharCode(prefix.charCodeAt(prefix.length - 1) + 1);
+	return db.collection('rooms')
+		.where('type', '==', 'PUBLIC')
+		.where('name_lower', '>=', prefix)
+		.where('name_lower', '<', end)
+		.limit(50)
+		.onSnapshot(snapshot => {
+			updateArrayWithChanges(rooms, snapshot.docChanges());
+			consumer(rooms.map(data => new Room(data)));
+		});
+}

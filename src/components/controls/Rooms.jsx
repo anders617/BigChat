@@ -2,14 +2,14 @@ import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalBody, ModalHeader, ListGroup, ListGroupItem, Button, FormInput } from 'shards-react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faSearch } from '@fortawesome/free-solid-svg-icons';
 import User from '../../api/User';
 import Room, { Type } from '../../api/Room';
-import { useRoomIDs, useRooms } from '../../api/hooks';
 import CreateRoom from './CreateRoom';
 import { removeUserFromRoom } from '../../api/functions';
 import AnimatedButton from './AnimatedButton';
 import ContentEditable from 'react-contenteditable';
+import FindRoom from './FindRoom';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
@@ -44,6 +44,7 @@ function RoomComponent({ room, me, currentRoom, setRoom, toggle }) {
 
 export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle }) {
     const [createOpen, setCreateOpen] = useState(false);
+    const [findRoomOpen, setFindRoomOpen] = useState(false);
     const publicFilterRef = useRef();
     const [publicFilter, setPublicFilter] = useState('Public Rooms');
     const privateFilterRef = useRef();
@@ -65,10 +66,17 @@ export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle })
                     Rooms
                     <Button
                         title="Create room"
-                        style={{ float: 'right' }}
+                        style={{ float: 'right', marginLeft: '4px' }}
                         onClick={() => { toggle(); setCreateOpen(true) }}
                     >
                         <FontAwesomeIcon icon={faPlus} />
+                    </Button>
+                    <Button
+                        title="Find room"
+                        style={{ float: 'right', marginLeft: '4px' }}
+                        onClick={() => { toggle(); setFindRoomOpen(true) }}
+                    >
+                        <FontAwesomeIcon icon={faSearch} />
                     </Button>
                 </ModalHeader>
                 <ModalBody style={{ height: 'calc(100vh - 130px)' }}>
@@ -104,6 +112,7 @@ export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle })
                 </ModalBody>
             </Modal>
             <CreateRoom open={createOpen} toggle={() => setCreateOpen(!createOpen)} />
+            <FindRoom me={me} rooms={rooms} setRoom={setRoom} open={findRoomOpen} toggle={() => setFindRoomOpen(!findRoomOpen)} />
         </div >
     );
 }

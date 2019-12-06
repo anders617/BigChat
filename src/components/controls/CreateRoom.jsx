@@ -33,7 +33,6 @@ export default function CreateRoom({ open, toggle }) {
                         <FormSelect id="type" innerRef={type}>
                             <option value={Type.PRIVATE}>Private</option>
                             <option value={Type.PUBLIC}>Public</option>
-                            {/* <option value={Type.DIRECT}>Direct</option> */}
                         </FormSelect>
                     </label>
                     <br />

@@ -290,9 +290,9 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
   }
   const usersRef = roomRef.collection('users').doc(context.auth.token.uid);
   const roomsRef = app.firestore().collection('users').doc(context.auth.token.uid).collection('rooms').doc(roomRef.id);
-  const friendRef = app.firestore().collection('users').doc(friendID);
-  const friendRoomsRef = friendRef.collection('rooms').doc(roomRef.id);
-  const roomFriendRef = roomRef.collection('users').doc(friendID);
+  const friendRef = type === 'DIRECT' ? app.firestore().collection('users').doc(friendID) : null;
+  const friendRoomsRef = type === 'DIRECT' ? friendRef.collection('rooms').doc(roomRef.id) : null;
+  const roomFriendRef = type === 'DIRECT' ? roomRef.collection('users').doc(friendID) : null;
   try {
     await app.firestore().runTransaction(async transaction => {
       const room = await transaction.get(roomRef);
@@ -306,6 +306,7 @@ exports.createRoom = functions.https.onCall(async (data, context) => {
       transaction.set(roomRef, {
         type,
         name,
+        name_lower: name.toLowerCase(),
       });
       if (type !== 'SITE') {
         transaction.set(roomsRef, {});

@@ -9,6 +9,7 @@ import {
     subscribeContent,
     subscribeContents,
     subscribeUserIDs,
+    subscribeRoomNamePrefix,
 } from './Room';
 import {
     subscribeMe,
@@ -195,4 +196,14 @@ export function useFriendRequests(userID) {
     }, [userID]);
 
     return friendRequests;
+}
+
+export function useRoomsByName(prefix) {
+    const [rooms, setRooms] = useState([]);
+
+    useEffect(() => {
+        return subscribeRoomNamePrefix(setRooms, prefix);
+    }, [prefix]);
+
+    return rooms;
 }
