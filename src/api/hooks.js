@@ -25,7 +25,10 @@ export function useRoom(roomID) {
     const [room, setRoom] = useState(null);
 
     useEffect(() => {
-        if (!roomID) return () => {};
+        if (roomID === null) {
+            setRoom(null);
+            return () => {};
+        }
         return subscribeRoom(setRoom, roomID);
     }, [roomID]);
 
@@ -36,9 +39,10 @@ export function useRooms(roomIDs) {
     const [rooms, setRooms] = useState([]);
 
     useEffect(() => {
-        const newRooms = Array(roomIDs.length).fill(null);
+        let newRooms = Array(roomIDs.length).fill(null);
         const unsubscribes = roomIDs.map((roomID, i) => subscribeRoom(room => {
-            newRooms[i] = room;
+            newRooms = Array.concat(newRooms.slice(0, i), room, newRooms.slice(i + 1));
+            setRooms(newRooms);
         }, roomID));
         setRooms(newRooms);
         return () => {
@@ -149,8 +153,10 @@ export function useUsers(userIDs) {
     const [users, setUsers] = useState([]);
 
     useEffect(() => {
-        const newUsers = Array(userIDs.length).fill(null);
+        let newUsers = Array(userIDs.length).fill(null);
         const unsubscribes = userIDs.map((userID, i) => subscribeUser(user => {
+            newUsers = Array.concat(newUsers.slice(0, i), user, newUsers.slice(i + 1));
+            setUsers(newUsers);
             newUsers[i] = user;
         }, userID));
         setUsers(newUsers);
