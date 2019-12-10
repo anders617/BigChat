@@ -21,7 +21,7 @@ export default function FindRoom({ me, rooms, setRoom, open, toggle }) {
         .filter(room => room && (rooms === null || !rooms.map(r => r && r.id).includes(room.id)))
         .map(room => (
             <ListGroupItem key={room.id}>
-                {room.name}
+                <div style={{ marginTop: '8px', display: 'inline-block' }}>{room.name}</div>
                 <AnimatedButton
                     title="Join room"
                     style={{ float: 'right' }}
@@ -36,14 +36,15 @@ export default function FindRoom({ me, rooms, setRoom, open, toggle }) {
         <div>
             <Modal size="lg" open={open} toggle={toggle}>
                 <ModalHeader className="find-room-modal-header" style={{ width: '100%' }}>
-                    Find Rooms
+                    <h4 style={{ display: 'inline-block' }}>Find Rooms</h4>
+                </ModalHeader>
+                <ModalBody>
                     <FormInput
+                        style={{ marginBottom: '10px' }}
                         onChange={e => { setRoomPrefix(e.target.value) }}
                         value={roomPrefix}
                         placeholder="Search By Name"
                     />
-                </ModalHeader>
-                <ModalBody>
                     <ListGroup>
                         {roomComponents}
                     </ListGroup>

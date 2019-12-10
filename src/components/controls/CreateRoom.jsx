@@ -26,7 +26,9 @@ export default function CreateRoom({ open, toggle }) {
     return (
         <>
             <Modal open={open} toggle={toggle}>
-                <ModalHeader>Create Room</ModalHeader>
+                <ModalHeader>
+                    <h4 style={{ display: 'inline-block' }}>Create Room</h4>
+                </ModalHeader>
                 <ModalBody>
                     <label>
                         Type
@@ -36,14 +38,16 @@ export default function CreateRoom({ open, toggle }) {
                         </FormSelect>
                     </label>
                     <br />
-                    <label>
+                    <label style={{ width: '100%' }}>
                         Room Name
                         <FormInput
+                            placeholder="Name must not be empty"
                             invalid={name.length === 0}
                             value={name}
                             onChange={e => setName(e.target.value)}
                         />
                     </label>
+                    <br />
                     <br />
                     <AnimatedButton
                         style={{ float: 'right', marginLeft: '4px' }}

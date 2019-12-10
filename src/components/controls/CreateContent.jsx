@@ -38,16 +38,20 @@ export default function CreateContent({ open, toggle, room, setContent }) {
     return (
         <>
             <Modal open={open} toggle={toggle}>
-                <ModalHeader>Create Content</ModalHeader>
+                <ModalHeader>
+                    <h4 style={{ display: 'inline-block' }}>Create Content</h4>
+                </ModalHeader>
                 <ModalBody>
-                    <label>
+                    <label style={{ width: '100%' }}>
                         Content Name
                         <FormInput
                             invalid={name.length === 0}
+                            placeholder="Content name must not be empty"
                             value={name}
                             onChange={e => setName(e.target.value)}
                         />
                     </label>
+                    <br />
                     <br />
                     <AnimatedButton
                         style={{ float: 'right', marginLeft: '4px' }}

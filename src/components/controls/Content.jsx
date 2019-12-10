@@ -66,9 +66,9 @@ export default function Content({ room, me, content, setContent, open, toggle })
         <div>
             <Modal size="lg" open={open} toggle={toggle}>
                 <ModalHeader className='content-modal-header' style={{ width: '100%' }}>
-                    Content
+                    <h4 style={{ display: 'inline-block' }}>Content</h4>
                     <Button
-                        title="Create room"
+                        title="Create content"
                         style={{ float: 'right' }}
                         onClick={() => { toggle(); setCreateOpen(true) }}
                     >

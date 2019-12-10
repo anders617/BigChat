@@ -16,7 +16,7 @@ sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssR
 
 function RoomComponent({ room, me, currentRoom, setRoom, toggle }) {
     return (
-        <ListGroupItem key={room.id} style={{ lineHeight: '2.5' }}>
+        <ListGroupItem key={room.id} style={{ lineHeight: '2.5', border: '0px' }}>
             {room.name}
             <div style={{ float: 'right' }}>
                 <Button
@@ -63,7 +63,7 @@ export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle })
         <div>
             <Modal open={open} toggle={toggle}>
                 <ModalHeader className="rooms-modal-header" style={{ width: '100%' }}>
-                    Rooms
+                    <h4 style={{ display: 'inline-block' }}>Rooms</h4>
                     <Button
                         title="Create room"
                         style={{ float: 'right', marginLeft: '4px' }}
@@ -80,32 +80,32 @@ export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle })
                     </Button>
                 </ModalHeader>
                 <ModalBody style={{ height: 'calc(100vh - 130px)' }}>
-                    <ListGroup style={{ height: '50%' }}>
+                    <ListGroup style={{ height: '48%' }}>
                         <ContentEditable
                             innerRef={publicFilterRef}
                             html={publicFilter}
-                            style={{ fontSize: '1.3rem', lineHeight: '1.5rem', marginBottom: '6px', fontWeight: 330, color: 'black' }}
+                            style={{ fontSize: '1.25rem', lineHeight: '1.5rem', marginBottom: '6px', fontWeight: 330, color: 'black' }}
                             onKeyDown={(e) => e.keyCode === 13 && e.preventDefault()}
                             onChange={e => { setPublicFilter(e.target.value) }}
                             onClick={() => { if (publicFilter === 'Public Rooms') setPublicFilter('') }}
                             onBlur={() => { if (publicFilterRef.current.innerText === '') setPublicFilter('Public Rooms') }}
                         />
-                        <div style={{ overflow: 'scroll', maxHeight: '100%' }}>
+                        <div style={{ overflowY: 'scroll', maxHeight: '100%' }}>
                             {publicRooms}
                         </div>
                     </ListGroup>
                     <br />
-                    <ListGroup style={{ height: '50%' }}>
+                    <ListGroup style={{ height: '48%' }}>
                         <ContentEditable
                             innerRef={privateFilterRef}
                             html={privateFilter}
-                            style={{ fontSize: '1.3rem', lineHeight: '1.5rem', marginBottom: '6px', fontWeight: 330, color: 'black' }}
+                            style={{ fontSize: '1.25rem', lineHeight: '1.5rem', marginBottom: '6px', fontWeight: 330, color: 'black' }}
                             onKeyDown={(e) => e.keyCode === 13 && e.preventDefault()}
                             onChange={e => { setPrivateFilter(e.target.value) }}
                             onClick={() => { if (privateFilter === 'Private Rooms') setPrivateFilter('') }}
                             onBlur={() => { if (privateFilterRef.current.innerText === '') setPrivateFilter('Private Rooms') }}
                         />
-                        <div style={{ overflow: 'scroll', maxHeight: '100%' }}>
+                        <div style={{ overflowY: 'scroll', maxHeight: '100%' }}>
                             {privateRooms}
                         </div>
                     </ListGroup>
