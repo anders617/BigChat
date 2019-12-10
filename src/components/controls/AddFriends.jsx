@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { useUsersByName } from '../../api/hooks';
 import SendFriendRequest from './SendFriendRequest';
+import User from '../../api/User';
 
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.add-friends-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
@@ -20,7 +21,7 @@ export default function AddFriends({ me, friendIDs, open, toggle }) {
         .map(user => (
             <ListGroupItem key={user.id}>
                 <Avatar url={user.photoURL} />
-                {user.name}
+                <div style={{ marginTop: '8px', display: 'inline-block' }}>{user.name}</div>
                 <Button
                     title="Send friend request"
                     style={{ float: 'right' }}
@@ -35,14 +36,15 @@ export default function AddFriends({ me, friendIDs, open, toggle }) {
         <div>
             <Modal size="lg" open={open} toggle={toggle}>
                 <ModalHeader className="add-friends-modal-header" style={{ width: '100%' }}>
-                    Add Friends
+                    <h4 style={{ display: 'inline-block' }}>Add Friends</h4>
+                </ModalHeader>
+                <ModalBody>
                     <FormInput
+                        style={{ marginBottom: '10px' }}
                         onChange={e => { setUserPrefix(e.target.value) }}
                         value={userPrefix}
                         placeholder="Search By Name"
                     />
-                </ModalHeader>
-                <ModalBody>
                     <ListGroup>
                         {userComponents}
                     </ListGroup>
