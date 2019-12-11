@@ -12,9 +12,9 @@ function extractFragmentInfo(url) {
     const kv = {};
     const kvPairs = fragment.split('&');
     kvPairs.forEach(pair => {
-        const [key, value] = pair.split('=');
+        const [key, ...value] = pair.split('=');
         if (key && value && key.startsWith('BC.')) {
-            kv[key.substring(3)] = value;
+            kv[key.substring(3)] = value.join('=');
         }
     });
     return kv;
