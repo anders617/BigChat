@@ -430,12 +430,19 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
   if (state && !['PLAYING', 'PAUSED'].includes(state)) throw new functions.https.HttpsError('invalid-argument', 'Invalid state');
   const roomRef = app.firestore().collection('rooms').doc(roomID);
   const contentRef = roomRef.collection('content').doc(contentID);
+  const roomUserRef = roomRef.collection('users').doc(context.auth.uid);
   try {
     await app.firestore().runTransaction(async transaction => {
-      const inRoom = (await transaction.get(roomRef.collection('users').doc(context.auth.uid))).exists;
-      if (!inRoom) throw "Not in room";
-      const currentContent = await transaction.get(contentRef);
-      if (currentContent.data().sequence >= sequence) throw "Concurrent update";
+      const room = await transaction.get(roomRef);
+      if (!room.exists) throw new Error(`Room ${roomID} does not exist`);
+
+      const roomUser = await transaction.get(roomUserRef);
+      if (!roomUser.exists && room.data().type !== 'SITE') throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
+
+      const content = await transaction.get(contentRef);
+      if (!content.exists) throw new Error(`Content ${contentRef.id} does not exist in room ${roomRef.id}`);
+      if (content.data().sequence >= sequence) throw new Error('Concurrent update');
+
       return transaction.update(contentRef, {
         ...state && {
           state
@@ -452,7 +459,7 @@ exports.updateContent = functions.https.onCall(async (data, context) => {
     });
   } catch (e) {
     console.log(e);
-    throw new functions.https.HttpsError('aborted', 'Transaction failed');
+    throw new functions.https.HttpsError('aborted', e.message);
   }
 });
 
@@ -497,7 +504,7 @@ exports.createContent = functions.https.onCall(async (data, context) => {
       const room = await transaction.get(roomRef);
       if (!room.exists) throw new Error(`Room ${roomID} does not exist`);
       const roomUser = await transaction.get(roomUserRef);
-      if (!roomUser.exists) throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
+      if (!roomUser.exists && room.data().type !== 'SITE') throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
       return transaction.set(contentRef, {
         state,
         time: time || 0,
@@ -516,6 +523,7 @@ exports.createContent = functions.https.onCall(async (data, context) => {
   return {
     'success': true,
     'contentID': contentRef.id,
+    'url': detailedURL,
   };
 });
 
@@ -540,8 +548,10 @@ exports.deleteContent = functions.https.onCall(async (data, context) => {
   const contentRef = roomRef.collection('content').doc(contentID);
   try {
     await app.firestore().runTransaction(async transaction => {
+      const room = await transaction.get(roomRef);
+      if (!room.exists) throw new Error(`Room ${roomID} does not exist`);
       const roomUser = await transaction.get(roomUserRef);
-      if (!roomUser.exists) throw new Error(`User ${roomUser.id} is not in room ${room.id}`);
+      if (!roomUser.exists && room.data().type !== 'SITE') throw new Error(`User ${roomUser.id} is not in room ${roomRef.id}`);
       return transaction.delete(contentRef);
     });
   } catch (e) {

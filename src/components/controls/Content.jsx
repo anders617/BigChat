@@ -29,6 +29,12 @@ export default function Content({ room, me, content, setContent, open, toggle })
         if (sync) sync.synchronize(room, me, content);
     }, [room, me, content]);
 
+    const syncContent = async (newContent) => {
+        await Call('controls.goto', newContent.url);
+        setContent(newContent.id);
+        toggle();
+    }
+
     const contentComponents = contents.map(contentItem => (
         <ListGroupItem key={contentItem.id}>
             <p>
@@ -43,13 +49,13 @@ export default function Content({ room, me, content, setContent, open, toggle })
                 {contentItem.state}
             </Progress>
             <br />
-            <Button
+            <AnimatedButton
                 disabled={content && content.id === contentItem.id}
                 style={{ float: 'right', marginLeft: '4px' }}
-                onClick={() => { Call('controls.goto', contentItem.url) }}
+                onClick={() => syncContent(contentItem)}
             >
                 Sync
-            </Button>
+            </AnimatedButton>
             <AnimatedButton
                 theme='danger'
                 style={{ float: 'right', marginLeft: '4px' }}

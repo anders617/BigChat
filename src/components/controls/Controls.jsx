@@ -32,7 +32,7 @@ export default function Controls({ me, room, rooms, content, setRoom, setContent
 					</Col>
 				</Row>
 			</Container>
-			<Rooms me={me} currentRoom={room} rooms={rooms} setRoom={setRoom} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
+			<Rooms me={me} currentRoom={room} rooms={rooms} setRoom={setRoom} setContent={setContent} open={roomsOpen} toggle={() => { setRoomsOpen(!roomsOpen) }} />
 			<Content room={room} me={me} content={content} setContent={setContent} open={contentOpen} toggle={() => { setContentOpen(!contentOpen) }} />
 			<Friends me={me} room={room} rooms={rooms} setRoom={setRoom} open={friendsOpen} toggle={() => { setFriendsOpen(!friendsOpen) }} />
 		</div >

@@ -56,7 +56,7 @@ export default function CreateContent({ open, toggle, room, setContent }) {
                     <AnimatedButton
                         style={{ float: 'right', marginLeft: '4px' }}
                         onClick={create}
-                        onComplete={(result) => { setContent(result.data.contentID); toggle(); }}
+                        onComplete={(response) => { setContent(response.data.contentID); Call('controls.goto', response.data.url); toggle(); }}
                     >
                         Create
                     </AnimatedButton>

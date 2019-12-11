@@ -89,6 +89,7 @@ class HTMLMediaControls {
 	// eslint-disable-next-line class-methods-use-this
 	goto(url) {
 		window.location.href = url;
+		return null;
 	}
 
 	url() {

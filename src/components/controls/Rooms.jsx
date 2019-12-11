@@ -14,14 +14,14 @@ import FindRoom from './FindRoom';
 const sheet = window.document.styleSheets[0];
 sheet.insertRule('.rooms-modal-header .modal-title { width: 100%; }', sheet.cssRules.length);
 
-function RoomComponent({ room, me, currentRoom, setRoom, toggle }) {
+function RoomComponent({ room, me, currentRoom, setRoom, setContent, toggle }) {
     return (
         <ListGroupItem key={room.id} style={{ lineHeight: '2.5', border: '0px' }}>
             {room.name}
             <div style={{ float: 'right' }}>
                 <Button
                     disabled={currentRoom && room.id === currentRoom.id}
-                    onClick={() => { setRoom(room.id); toggle(); }}
+                    onClick={() => { setRoom(room.id); setContent(null); toggle(); }}
                     style={{ marginLeft: '4px' }}
                 >
                     Join
@@ -42,7 +42,7 @@ function RoomComponent({ room, me, currentRoom, setRoom, toggle }) {
     );
 }
 
-export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle }) {
+export default function Rooms({ me, currentRoom, rooms, setRoom, setContent, open, toggle }) {
     const [createOpen, setCreateOpen] = useState(false);
     const [findRoomOpen, setFindRoomOpen] = useState(false);
     const publicFilterRef = useRef();
@@ -53,11 +53,11 @@ export default function Rooms({ me, currentRoom, rooms, setRoom, open, toggle })
     const publicRooms = rooms
         .filter(room => room && room.type === Type.PUBLIC)
         .filter(room => publicFilter === 'Public Rooms' || room.name.toLowerCase().includes(publicFilter.toLowerCase()))
-        .map(room => RoomComponent({ room, me, currentRoom, setRoom, toggle }));
+        .map(room => RoomComponent({ room, me, currentRoom, setRoom, setContent, toggle }));
     const privateRooms = rooms
         .filter(room => room && room.type === Type.PRIVATE)
         .filter(room => privateFilter === 'Private Rooms' || room.name.toLowerCase().includes(privateFilter.toLowerCase()))
-        .map(room => RoomComponent({ room, me, currentRoom, setRoom, toggle }));
+        .map(room => RoomComponent({ room, me, currentRoom, setRoom, setContent, toggle }));
 
     return (
         <div>
