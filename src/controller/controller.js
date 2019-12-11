@@ -97,7 +97,7 @@ class HTMLMediaControls {
 	}
 
 	title() {
-		return this.select('.title').innerText;
+		return this.select('.title', 'title').innerText || '';
 	}
 
 	documentTitle() {

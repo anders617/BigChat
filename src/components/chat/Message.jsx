@@ -67,7 +67,7 @@ export default function Message({ message, isOwnedByUser }) {
   if (!isOwnedByUser) {
     messageCard = (
       <div>
-        <Avatar url={message.photoURL} />
+        <Avatar url={message.photoURL} style={{ marginTop: '6px' }} />
         <Card style={otherCardStyle}>
           <CardBody style={otherBodyStyle}>
             {message.message}
